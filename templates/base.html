@@ -7,6 +7,11 @@
     <title>{% block title %}Ghoreranna{% endblock %}</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <!-- Google Fonts: Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -14,9 +19,34 @@
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                    },
                     colors: {
                         primary: '#FF6B35',
+                        primaryHover: '#f95921',
                         darkbg: '#0f172a'
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
                     }
                 }
             }
@@ -24,16 +54,16 @@
     </script>
 </head>
 
-<body class="bg-gray-50 flex flex-col min-h-screen">
+<body class="bg-slate-50 flex flex-col min-h-screen text-slate-800 antialiased font-sans selection:bg-primary selection:text-white">
 
     <!-- 🔷 Navbar -->
     <nav
-        class="bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-100/50 fixed w-full z-50 transition-all duration-300">
+        class="bg-white/70 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.03)] border-b border-white/50 fixed w-full z-50 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
 
                 <!-- Logo -->
-                <a href="/" class="text-2xl font-bold text-primary">
+                <a href="/" class="text-2xl font-black bg-gradient-to-r from-primary to-rose-500 bg-clip-text text-transparent hover:scale-105 transition-transform duration-300">
                     Ghoreranna
                 </a>
 
@@ -67,8 +97,8 @@
                         </svg>
                         My Deliveries
                     </a>
-                    {% else %}
-                    <a href="{% url 'profile' %}?tab={% if request.session.user_role == 'Admin' %}all-orders{% elif request.session.user_role == 'Home Cook' %}incoming-orders{% else %}tracking{% endif %}"
+                    {% elif request.session.user_role != 'Admin' %}
+                    <a href="{% url 'profile' %}?tab={% if request.session.user_role == 'Home Cook' %}incoming-orders{% else %}tracking{% endif %}"
                         class="flex items-center gap-1.5 text-gray-700 hover:text-primary transition group">
                         <svg class="w-4 h-4 text-gray-400 group-hover:text-primary transition-colors" fill="none"
                             stroke="currentColor" viewBox="0 0 24 24">
@@ -143,8 +173,8 @@
                     {% else %}
                     <div class="flex items-center space-x-4">
                         <a href="{% url 'login' %}"
-                            class="flex items-center gap-1 text-gray-700 hover:text-primary transition group">
-                            <svg class="w-4 h-4 text-gray-400 group-hover:text-primary" fill="none"
+                            class="flex items-center gap-1 text-slate-700 hover:text-primary transition group font-medium">
+                            <svg class="w-4 h-4 text-slate-400 group-hover:text-primary transition-colors" fill="none"
                                 stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -152,7 +182,7 @@
                             Login
                         </a>
                         <a href="{% url 'register' %}"
-                            class="flex items-center gap-1.5 bg-primary text-white px-4 py-2 rounded-lg hover:opacity-90 transition shadow-sm">
+                            class="flex items-center gap-1.5 bg-gradient-to-r from-primary to-rose-500 text-white px-5 py-2.5 rounded-xl hover:shadow-lg hover:shadow-primary/30 transition-all duration-300 hover:-translate-y-0.5 font-semibold">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
@@ -199,8 +229,8 @@
                 </svg>
                 My Deliveries
             </a>
-            {% else %}
-            <a href="{% url 'profile' %}?tab={% if request.session.user_role == 'Admin' %}all-orders{% elif request.session.user_role == 'Home Cook' %}incoming-orders{% else %}tracking{% endif %}"
+            {% elif request.session.user_role != 'Admin' %}
+            <a href="{% url 'profile' %}?tab={% if request.session.user_role == 'Home Cook' %}incoming-orders{% else %}tracking{% endif %}"
                 class="flex items-center gap-2 py-3 text-gray-700 border-b border-gray-50">
                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -257,7 +287,7 @@
                 Login
             </a>
             <a href="{% url 'register' %}"
-                class="flex items-center justify-center gap-2 mt-4 bg-primary text-white py-3 rounded-xl shadow-lg">
+                class="flex items-center justify-center gap-2 mt-4 bg-gradient-to-r from-primary to-rose-500 text-white py-3.5 rounded-xl shadow-lg hover:shadow-primary/30 transition-all font-bold">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />

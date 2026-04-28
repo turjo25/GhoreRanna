@@ -3,28 +3,39 @@
 {% block title %}Login - Homemade Food Delivery{% endblock %}
 
 {% block content %}
-<div class="flex justify-center items-center min-h-[70vh]">
-    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 class="text-3xl font-bold text-center text-primary mb-6">Welcome Back</h2>
+<div class="flex justify-center items-center min-h-[70vh] py-12 px-4 animate-fade-in relative">
+    <!-- Decorative blobs -->
+    <div class="absolute top-1/4 left-1/4 w-64 h-64 bg-primary/20 rounded-full blur-3xl animate-blob"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-64 h-64 bg-rose-500/20 rounded-full blur-3xl animate-blob animation-delay-2000"></div>
 
-        <form method="POST" action="{% url 'login' %}" class="space-y-4">
+    <div class="bg-white/80 backdrop-blur-xl p-8 sm:p-10 rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 w-full max-w-md relative z-10">
+        <div class="w-16 h-16 bg-gradient-to-br from-primary to-orange-400 rounded-2xl mx-auto flex items-center justify-center shadow-lg shadow-orange-200 mb-6">
+            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+        </div>
+        <h2 class="text-3xl font-extrabold text-center text-gray-900 tracking-tight mb-2">Welcome Back</h2>
+        <p class="text-center text-gray-500 text-sm mb-8">Sign in to your GhorerRanna account</p>
+
+        <form method="POST" action="{% url 'login' %}" class="space-y-5">
             {% csrf_token %}
 
             {% for field in form %}
             <div>
-                <label class="block text-gray-700 font-medium mb-1">{{ field.label }}</label>
+                <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">{{ field.label }}</label>
                 {{ field }}
+                {% if field.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>
+                {% endif %}
             </div>
             {% endfor %}
 
             <button type="submit"
-                class="w-full bg-primary text-white font-bold py-3 rounded-lg hover:bg-opacity-90 transition duration-300 mt-6">
-                Login
+                class="w-full bg-primary text-white font-bold py-4 rounded-xl hover:bg-orange-600 transition duration-300 mt-6 shadow-md shadow-orange-200 flex justify-center items-center gap-2 group">
+                Sign In
+                <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </button>
 
-            <p class="text-center text-gray-600 mt-4">
-                Don't have an account? <a href="{% url 'register' %}" class="text-primary hover:underline">Register
-                    here</a>
+            <p class="text-center text-gray-600 mt-6 text-sm font-medium">
+                Don't have an account? <a href="{% url 'register' %}" class="text-primary hover:text-orange-600 font-bold transition">Register here</a>
             </p>
         </form>
     </div>

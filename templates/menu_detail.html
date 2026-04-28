@@ -5,15 +5,15 @@
 <div class="py-8 animate-page-in">
 
     <!-- Breadcrumb -->
-    <nav class="flex items-center space-x-2 text-sm text-gray-500 mb-8">
+    <nav class="flex items-center space-x-2 text-sm text-slate-500 mb-8 font-medium">
         <a href="{% url 'home' %}" class="hover:text-primary transition flex items-center gap-1">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
             Home
         </a>
-        <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         <a href="{% url 'menu_list' %}" class="hover:text-primary transition">Menu</a>
-        <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-        <span class="text-gray-800 font-medium truncate max-w-xs">{{ menu.item_name }}</span>
+        <svg class="w-4 h-4 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <span class="text-slate-800 font-bold truncate max-w-xs">{{ menu.item_name }}</span>
     </nav>
 
     <!-- Main Content Grid -->
@@ -22,32 +22,32 @@
         <!-- LEFT: Image Panel (3/5 width) -->
         <div class="lg:col-span-3">
             <!-- Hero Image Card -->
-            <div class="relative rounded-3xl overflow-hidden shadow-2xl bg-gray-100 aspect-[4/3] group">
+            <div class="relative rounded-[2.5rem] overflow-hidden shadow-2xl shadow-slate-200 bg-slate-100 aspect-[4/3] group border border-slate-100">
                 {% if menu.image %}
                 <img src="{{ menu.image.url }}"
                      alt="{{ menu.item_name }}"
                      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
                 {% else %}
                 <!-- Placeholder if no image -->
-                <div class="w-full h-full bg-gradient-to-br from-orange-50 via-amber-50 to-orange-100 flex flex-col items-center justify-center">
-                    <svg class="w-28 h-28 text-orange-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="w-full h-full bg-gradient-to-br from-slate-100 via-slate-50 to-slate-200 flex flex-col items-center justify-center">
+                    <svg class="w-28 h-28 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
-                    <p class="text-orange-300 mt-4 font-medium text-lg">No image available</p>
+                    <p class="text-slate-400 mt-4 font-bold text-lg">No image available</p>
                 </div>
                 {% endif %}
 
                 <!-- Floating Badges -->
                 <div class="absolute top-5 left-5 flex flex-col gap-2">
-                    <span class="bg-white/90 backdrop-blur-sm text-gray-800 text-xs font-bold uppercase tracking-widest px-4 py-2 rounded-full shadow-lg">
+                    <span class="bg-white/95 backdrop-blur-md text-slate-800 text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-full shadow-lg border border-white/50">
                         {{ menu.meal_type }}
                     </span>
                     {% if not menu.availability_status %}
-                    <span class="bg-red-500/90 backdrop-blur-sm text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg">
+                    <span class="bg-red-500/95 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-full shadow-lg border border-red-400/50">
                         Currently Unavailable
                     </span>
                     {% else %}
-                    <span class="bg-green-500/90 backdrop-blur-sm text-white text-xs font-bold px-4 py-2 rounded-full shadow-lg flex items-center gap-1.5">
+                    <span class="bg-emerald-500/95 backdrop-blur-md text-white text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-full shadow-lg border border-emerald-400/50 flex items-center gap-1.5">
                         <span class="w-2 h-2 bg-white rounded-full inline-block animate-pulse"></span>
                         Available Now
                     </span>
@@ -55,32 +55,32 @@
                 </div>
 
                 <!-- Gradient Bottom Overlay -->
-                <div class="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/50 to-transparent"></div>
-                <div class="absolute bottom-5 right-5">
-                    <span class="bg-white text-gray-900 text-2xl font-black px-5 py-2 rounded-2xl shadow-xl">
+                <div class="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent"></div>
+                <div class="absolute bottom-6 right-6">
+                    <span class="bg-white text-slate-900 text-3xl font-black px-6 py-2.5 rounded-2xl shadow-2xl shadow-black/20 border border-white/50">
                         ৳{{ menu.price }}
                     </span>
                 </div>
             </div>
 
             <!-- Description Card -->
-            <div class="mt-6 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h2 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <span class="w-1 h-5 bg-primary rounded-full inline-block"></span>
+            <div class="mt-8 bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 p-8">
+                <h2 class="text-xl font-black text-slate-900 mb-4 flex items-center gap-2">
+                    <span class="w-1.5 h-6 bg-gradient-to-b from-primary to-rose-500 rounded-full inline-block"></span>
                     About this dish
                 </h2>
-                <p class="text-gray-600 leading-relaxed text-base">{{ menu.description }}</p>
+                <p class="text-slate-600 leading-relaxed text-base font-medium">{{ menu.description }}</p>
 
                 <!-- Tags Row -->
-                <div class="flex flex-wrap gap-2 mt-5">
-                    <span class="bg-orange-50 text-orange-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                <div class="flex flex-wrap gap-2.5 mt-6">
+                    <span class="bg-slate-50 border border-slate-100 text-slate-700 text-xs font-bold px-4 py-2 rounded-full">
                         🍽️ {{ menu.meal_type }}
                     </span>
-                    <span class="bg-blue-50 text-blue-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                    <span class="bg-slate-50 border border-slate-100 text-slate-700 text-xs font-bold px-4 py-2 rounded-full">
                         👨‍🍳 By {{ menu.homecook.name }}
                     </span>
                     {% if total_ordered > 0 %}
-                    <span class="bg-green-50 text-green-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+                    <span class="bg-orange-50 border border-orange-100 text-primary text-xs font-bold px-4 py-2 rounded-full">
                         🔥 {{ total_ordered }} orders placed
                     </span>
                     {% endif %}
@@ -92,54 +92,55 @@
         <div class="lg:col-span-2 space-y-5">
 
             <!-- Title + Price -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h1 class="text-3xl font-extrabold text-gray-900 leading-tight">{{ menu.item_name }}</h1>
-                <div class="flex items-center justify-between mt-4">
+            <div class="bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 p-8">
+                <h1 class="text-3xl font-black text-slate-900 leading-tight">{{ menu.item_name }}</h1>
+                <div class="flex items-center justify-between mt-6">
                     <div>
-                        <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Price</p>
-                        <p class="text-4xl font-black text-primary">৳{{ menu.price }}</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1.5">Price</p>
+                        <p class="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-rose-500">৳{{ menu.price }}</p>
                     </div>
                     <div class="text-right">
-                        <p class="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">Times Ordered</p>
-                        <p class="text-4xl font-black text-gray-800">{{ total_ordered }}</p>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-1.5">Times Ordered</p>
+                        <p class="text-4xl font-black text-slate-800">{{ total_ordered }}</p>
                     </div>
                 </div>
             </div>
 
             <!-- Cook Info Card -->
-            <div class="bg-gradient-to-br from-[#0f172a] to-[#1e293b] text-white rounded-2xl shadow-lg p-6">
-                <p class="text-xs text-gray-400 font-semibold uppercase tracking-widest mb-4">Made by</p>
-                <div class="flex items-center gap-4">
+            <div class="bg-gradient-to-br from-slate-900 via-[#0f172a] to-slate-800 text-white rounded-[2rem] shadow-xl shadow-slate-900/20 p-8 relative overflow-hidden group">
+                <div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl group-hover:bg-primary/30 transition-colors duration-500"></div>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-5 relative z-10">Made by</p>
+                <div class="flex items-center gap-5 relative z-10">
                     <!-- Avatar -->
-                    <div class="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center text-2xl font-black text-white shadow-lg flex-shrink-0">
+                    <div class="w-16 h-16 rounded-[1.25rem] bg-gradient-to-br from-primary to-rose-500 flex items-center justify-center text-3xl font-black text-white shadow-lg flex-shrink-0">
                         {{ menu.homecook.name|first|upper }}
                     </div>
                     <div>
-                        <p class="text-lg font-bold text-white">{{ menu.homecook.name }}</p>
-                        <p class="text-sm text-gray-400">Home Cook</p>
+                        <p class="text-xl font-black text-white">{{ menu.homecook.name }}</p>
+                        <p class="text-sm text-slate-400 font-medium mt-0.5">Home Cook</p>
                     </div>
                 </div>
-                <div class="mt-5 pt-5 border-t border-white/10 grid grid-cols-2 gap-4 text-center">
+                <div class="mt-6 pt-6 border-t border-white/10 grid grid-cols-2 gap-4 text-center relative z-10">
                     <div>
                         <p class="text-2xl font-black text-primary">{{ menu.homecook.menus.count }}</p>
-                        <p class="text-xs text-gray-400 mt-0.5">Menu Items</p>
+                        <p class="text-xs text-slate-400 mt-1 font-medium">Menu Items</p>
                     </div>
                     <div>
-                        <p class="text-2xl font-black {% if menu.homecook.status == 'Active' %}text-green-400{% else %}text-red-400{% endif %}">
+                        <p class="text-2xl font-black {% if menu.homecook.status == 'Active' %}text-emerald-400{% else %}text-rose-400{% endif %}">
                             {{ menu.homecook.status }}
                         </p>
-                        <p class="text-xs text-gray-400 mt-0.5">Cook Status</p>
+                        <p class="text-xs text-slate-400 mt-1 font-medium">Cook Status</p>
                     </div>
                 </div>
             </div>
 
             <!-- Action Card -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-3">
+            <div class="bg-white rounded-[2rem] shadow-[0_4px_20px_rgb(0,0,0,0.03)] border border-slate-100 p-8 space-y-3">
                 {% if menu.availability_status %}
                 {% if request.session.user_id and request.session.user_role != 'Admin' and request.session.user_role != 'Home Cook' %}
                 <!-- Order button -->
                 <a href="{% url 'cart_add' menu.pk %}"
-                   class="w-full flex items-center justify-center gap-3 bg-primary text-white font-bold py-4 px-6 rounded-xl hover:bg-orange-600 active:scale-95 transition-all duration-200 shadow-lg hover:shadow-orange-500/40 text-base group mt-2">
+                   class="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-primary to-rose-500 text-white font-bold py-4 px-6 rounded-[1.25rem] hover:from-primaryHover hover:to-rose-600 active:scale-95 transition-all duration-300 shadow-lg hover:shadow-primary/40 text-base group mt-2">
                     <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                     </svg>
@@ -148,7 +149,7 @@
 
                 <!-- Add to Order Box (Stay on page) -->
                 <a href="{% url 'cart_add' menu.pk %}?next=menu_detail"
-                   class="w-full flex items-center justify-center gap-2 bg-orange-50 text-primary font-bold py-3.5 px-6 rounded-xl hover:bg-orange-100 transition-all duration-200 border border-orange-100 text-sm group">
+                   class="w-full flex items-center justify-center gap-2 bg-orange-50 text-primary font-bold py-3.5 px-6 rounded-[1.25rem] hover:bg-orange-100 transition-all duration-300 border border-transparent text-sm group">
                     <svg class="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0H4m8-4v8"/>
                     </svg>
@@ -170,7 +171,7 @@
 
                 {% else %}
                 <button disabled
-                    class="w-full flex items-center justify-center gap-3 bg-gray-100 text-gray-400 font-bold py-4 px-6 rounded-xl cursor-not-allowed text-base">
+                    class="w-full flex items-center justify-center gap-3 bg-slate-100 text-slate-400 font-bold py-4 px-6 rounded-[1.25rem] cursor-not-allowed text-base">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
                     </svg>
@@ -180,7 +181,7 @@
 
                 <!-- Back to Menu -->
                 <a href="{% url 'menu_list' %}"
-                   class="w-full flex items-center justify-center gap-2 bg-gray-50 text-gray-700 font-semibold py-3.5 px-6 rounded-xl hover:bg-gray-100 transition-all duration-200 border border-gray-200 text-sm group">
+                   class="w-full flex items-center justify-center gap-2 bg-slate-50 text-slate-700 font-bold py-3.5 px-6 rounded-[1.25rem] hover:bg-slate-100 transition-all duration-300 border border-slate-100 text-sm group">
                     <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
                     </svg>
@@ -205,25 +206,25 @@
             </div>
 
             <!-- Quick Info Card -->
-            <div class="bg-orange-50 border border-orange-100 rounded-2xl p-5">
-                <h3 class="text-sm font-bold text-orange-800 mb-3 uppercase tracking-wider">Quick Info</h3>
-                <ul class="space-y-2.5">
+            <div class="bg-orange-50/50 border border-orange-100/50 rounded-[2rem] p-6">
+                <h3 class="text-[10px] font-bold text-primary mb-4 uppercase tracking-widest">Quick Info</h3>
+                <ul class="space-y-3">
                     <li class="flex items-center justify-between text-sm">
-                        <span class="text-orange-700 font-medium">Meal Type</span>
-                        <span class="text-gray-800 font-semibold">{{ menu.meal_type }}</span>
+                        <span class="text-slate-500 font-bold">Meal Type</span>
+                        <span class="text-slate-900 font-black">{{ menu.meal_type }}</span>
                     </li>
                     <li class="flex items-center justify-between text-sm">
-                        <span class="text-orange-700 font-medium">Availability</span>
-                        <span class="font-semibold {% if menu.availability_status %}text-green-600{% else %}text-red-500{% endif %}">
+                        <span class="text-slate-500 font-bold">Availability</span>
+                        <span class="font-black {% if menu.availability_status %}text-emerald-500{% else %}text-red-500{% endif %}">
                             {% if menu.availability_status %}Available{% else %}Unavailable{% endif %}
                         </span>
                     </li>
                     <li class="flex items-center justify-between text-sm">
-                        <span class="text-orange-700 font-medium">Cook</span>
-                        <span class="text-gray-800 font-semibold">{{ menu.homecook.name }}</span>
+                        <span class="text-slate-500 font-bold">Cook</span>
+                        <span class="text-slate-900 font-black">{{ menu.homecook.name }}</span>
                     </li>
                     <li class="flex items-center justify-between text-sm">
-                        <span class="text-orange-700 font-medium">Price</span>
+                        <span class="text-slate-500 font-bold">Price</span>
                         <span class="text-primary font-black text-base">৳{{ menu.price }}</span>
                     </li>
                 </ul>

@@ -71,9 +71,10 @@ def home_view(request):
 def menu_list(request):
     query = request.GET.get('q', '')
     category = request.GET.get('category', '')
+    cook_filter = request.GET.get('cook_filter', '')
     
     base_menus = Menu.objects.all()
-    if request.session.get('user_role') == 'Home Cook':
+    if request.session.get('user_role') == 'Home Cook' and cook_filter == 'mine':
         base_menus = base_menus.filter(homecook_id=request.session.get('user_id'))
 
     menus = base_menus
@@ -89,16 +90,13 @@ def menu_list(request):
         'query': query,
         'selected_category': category,
         'categories': categories,
+        'cook_filter': cook_filter,
     }
     return render(request, 'menu_list.html', context)
 
 def menu_detail(request, pk):
     menu = get_object_or_404(Menu, pk=pk)
     
-    if request.session.get('user_role') == 'Home Cook' and menu.homecook_id != request.session.get('user_id'):
-        messages.error(request, "You can only view your own menu items.")
-        return redirect('menu_list')
-
     total_ordered = menu.order_details.filter(
         order__order_status='Delivered'
     ).aggregate(total=Sum('quantity'))['total'] or 0
@@ -194,26 +192,30 @@ def cart_update(request, pk):
     return redirect('cart')
 
 def menu_add(request):
-    if request.session.get('user_role') not in ['Admin', 'Home Cook']:
+    user_role = request.session.get('user_role')
+    if user_role not in ['Admin', 'Home Cook']:
         messages.error(request, "Only Admins and Home Cooks can add menus.")
         return redirect('menu_list')
         
+    try:
+        user = User.objects.get(pk=request.session['user_id'])
+    except User.DoesNotExist:
+        messages.error(request, "Invalid user context.")
+        return redirect('menu_list')
+
     if request.method == 'POST':
-        form = MenuForm(request.POST, request.FILES)
+        form = MenuForm(request.POST, request.FILES, user=user)
         if form.is_valid():
             menu = form.save(commit=False)
-            # Find user
-            try:
-                user = User.objects.get(pk=request.session['user_id'])
+            if user_role == 'Admin':
+                menu.homecook = form.cleaned_data['homecook']
+            else:
                 menu.homecook = user
-                menu.save()
-                messages.success(request, 'Menu item added successfully!')
-                return redirect('menu_list')
-            except User.DoesNotExist:
-                messages.error(request, "Invalid user context.")
-                return redirect('menu_list')
+            menu.save()
+            messages.success(request, 'Menu item added successfully!')
+            return redirect('menu_list')
     else:
-        form = MenuForm()
+        form = MenuForm(user=user)
     
     return render(request, 'menu_form.html', {'form': form, 'action': 'Add'})
 
@@ -230,14 +232,24 @@ def menu_update(request, pk):
         messages.error(request, "You can only edit your own menu items.")
         return redirect('menu_list')
 
+    try:
+        user = User.objects.get(pk=request.session['user_id'])
+    except User.DoesNotExist:
+        messages.error(request, "Invalid user context.")
+        return redirect('menu_list')
+
     if request.method == 'POST':
-        form = MenuForm(request.POST, request.FILES, instance=menu)
+        form = MenuForm(request.POST, request.FILES, instance=menu, user=user)
         if form.is_valid():
+            if user_role == 'Admin' and 'homecook' in form.cleaned_data:
+                menu.homecook = form.cleaned_data['homecook']
             form.save()
             messages.success(request, 'Menu item updated successfully!')
             return redirect('menu_list')
     else:
-        form = MenuForm(instance=menu)
+        form = MenuForm(instance=menu, user=user)
+        if user_role == 'Admin':
+            form.fields['homecook'].initial = menu.homecook
         
     return render(request, 'menu_form.html', {'form': form, 'action': 'Update', 'menu': menu})
 

@@ -49,6 +49,17 @@ class MenuForm(forms.ModelForm):
             'availability_status': forms.CheckboxInput(attrs={'class': 'h-5 w-5 text-primary focus:ring-primary border-gray-300 rounded'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(MenuForm, self).__init__(*args, **kwargs)
+        if self.user and self.user.role == 'Admin':
+            self.fields['homecook'] = forms.ModelChoiceField(
+                queryset=User.objects.filter(role='Home Cook', status='Active'),
+                widget=forms.Select(attrs={'class': 'w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary'}),
+                label='Select Home Cook',
+                required=True
+            )
+
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
         model = User
