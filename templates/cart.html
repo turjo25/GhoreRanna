@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+{% block title %}Your Food Cart - Ghoreranna{% endblock %}
+
+{% block content %}
+<div class="py-12 max-w-5xl mx-auto px-4">
+    
+    <!-- Header & Navigation -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+        <div>
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight mb-2">Food Cart</h1>
+            <p class="text-gray-500">Manage your current selection and view past orders.</p>
+        </div>
+        <a href="{% url 'menu_list' %}" class="inline-flex items-center text-primary font-bold hover:text-orange-600 transition group">
+            <svg class="w-5 h-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Continue Browsing
+        </a>
+    </div>
+
+    <!-- 🏷️ Tabs -->
+    <div class="flex border-b border-gray-200 mb-8 bg-white p-1 rounded-xl shadow-sm">
+        <button onclick="switchTab('active-cart')" id="tab-active-cart" class="flex-1 py-3 text-sm font-bold rounded-lg transition-all duration-200 bg-primary text-white shadow-md">
+            Active Cart ({{ cart_count }})
+        </button>
+        <button onclick="switchTab('order-history')" id="tab-order-history" class="flex-1 py-3 text-sm font-bold rounded-lg transition-all duration-200 text-gray-500 hover:bg-gray-50">
+            Order History ({{ order_history.count }})
+        </button>
+    </div>
+
+    <!-- 🛒 Tab 1: Active Cart -->
+    <div id="content-active-cart" class="tab-content transition-all duration-300">
+        {% if cart_items %}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Items List -->
+            <div class="lg:col-span-2 space-y-4">
+                {% for item in cart_items %}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 flex items-center gap-4 transition-hover hover:shadow-md">
+                    <!-- Food Image -->
+                    <div class="w-24 h-24 rounded-xl overflow-hidden bg-gray-50 flex-shrink-0">
+                        {% if item.menu.image %}
+                        <img src="{{ item.menu.image.url }}" class="w-full h-full object-cover">
+                        {% else %}
+                        <div class="w-full h-full flex items-center justify-center text-gray-300">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Item Info -->
+                    <div class="flex-grow">
+                        <h3 class="text-lg font-bold text-gray-900">{{ item.menu.item_name }}</h3>
+                        <p class="text-sm text-gray-500 mb-2">By {{ item.menu.homecook.name }}</p>
+                        <div class="flex items-center gap-4">
+                            <span class="text-primary font-black">৳{{ item.menu.price }}</span>
+                            <!-- Quantity Control -->
+                            <div class="flex items-center bg-gray-100 rounded-lg p-1">
+                                <a href="{% url 'cart_update' item.menu.pk %}?action=decrement" class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm text-gray-600 transition">-</a>
+                                <span class="w-8 text-center text-sm font-bold">{{ item.quantity }}</span>
+                                <a href="{% url 'cart_update' item.menu.pk %}?action=increment" class="w-7 h-7 flex items-center justify-center rounded-md hover:bg-white hover:shadow-sm text-gray-600 transition">+</a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Subtotal & Remove -->
+                    <div class="text-right flex flex-col items-end gap-3">
+                        <span class="text-lg font-bold text-gray-900">৳{{ item.subtotal }}</span>
+                        <a href="{% url 'cart_remove' item.menu.pk %}" class="text-red-400 hover:text-red-600 transition p-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Summary Sidebar -->
+            <div class="lg:col-span-1">
+                <div class="bg-gray-900 text-white rounded-3xl p-8 shadow-xl sticky top-24">
+                    <h2 class="text-xl font-bold mb-6">Order Summary</h2>
+                    <div class="space-y-4 mb-8">
+                        <div class="flex justify-between text-gray-400 text-sm">
+                            <span>Subtotal</span>
+                            <span class="font-bold text-white">৳{{ total_amount }}</span>
+                        </div>
+                        <div class="flex justify-between text-gray-400 text-sm">
+                            <span>Delivery</span>
+                            <span class="text-green-400 font-bold">FREE</span>
+                        </div>
+                        <div class="border-t border-white/10 pt-4 flex justify-between items-end">
+                            <span class="text-lg">Total</span>
+                            <span class="text-3xl font-black text-primary">৳{{ total_amount }}</span>
+                        </div>
+                    </div>
+                    
+                    <a href="{% url 'checkout' %}" class="w-full bg-primary text-white font-bold py-4 rounded-2xl hover:bg-orange-600 transition shadow-lg shadow-primary/20 flex items-center justify-center gap-3">
+                        Checkout Now
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </a>
+                    
+                    <p class="text-center text-[10px] text-gray-500 mt-6 uppercase tracking-widest font-bold">Secure Payment Guaranteed</p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <!-- Empty State -->
+        <div class="bg-white rounded-3xl p-16 text-center border-2 border-dashed border-gray-100">
+            <div class="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center mx-auto mb-8">
+                <svg class="w-12 h-12 text-primary opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+            </div>
+            <h2 class="text-3xl font-black text-gray-900 mb-3">Your cart is empty</h2>
+            <p class="text-gray-500 mb-10 max-w-sm mx-auto leading-relaxed text-lg">Looks like you haven't added any delicious homemade meals yet.</p>
+            <a href="{% url 'menu_list' %}" class="inline-flex items-center justify-center bg-gray-900 text-white font-bold px-10 py-4 rounded-2xl hover:bg-gray-800 transition shadow-xl">
+                Start Ordering
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 📜 Tab 2: Order History -->
+    <div id="content-order-history" class="tab-content hidden transition-all duration-300">
+        {% if order_history %}
+        <div class="space-y-4">
+            {% for order in order_history %}
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center gap-5">
+                    <!-- Icon based on status -->
+                    <div class="w-14 h-14 rounded-2xl {% if order.order_status == 'Delivered' %}bg-green-50 text-green-600{% elif order.order_status == 'Cancelled' %}bg-red-50 text-red-600{% else %}bg-orange-50 text-orange-600{% endif %} flex items-center justify-center flex-shrink-0">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            {% if order.order_status == 'Delivered' %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            {% elif order.order_status == 'Cancelled' %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            {% else %}
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            {% endif %}
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-1">Order #{{ order.order_id }}</h3>
+                        <p class="text-sm text-gray-500 font-medium">{{ order.order_date|date:"F j, Y - g:i a" }}</p>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-8 justify-between md:justify-end">
+                    <div class="text-center md:text-right">
+                        <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mb-1">Amount</p>
+                        <p class="text-xl font-black text-gray-900">৳{{ order.total_amount }}</p>
+                    </div>
+                    <div>
+                        <span class="inline-flex items-center px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest
+                            {% if order.order_status == 'Delivered' %}bg-green-100 text-green-700
+                            {% elif order.order_status == 'Pending' %}bg-yellow-100 text-yellow-700
+                            {% elif order.order_status == 'Accepted' %}bg-blue-100 text-blue-700
+                            {% elif order.order_status == 'Cancelled' %}bg-red-100 text-red-700
+                            {% else %}bg-orange-100 text-orange-700{% endif %} shadow-sm border border-black/5">
+                            {{ order.order_status }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <!-- Empty History State -->
+        <div class="bg-white rounded-3xl p-16 text-center border border-gray-100">
+            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6 text-gray-300">
+                <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">No past orders found</h3>
+            <p class="text-gray-500">When you place an order, it will appear here.</p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<script>
+    function switchTab(tabName) {
+        // Hide all content
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.add('hidden');
+        });
+        
+        // Remove active button styles
+        document.getElementById('tab-active-cart').className = 'flex-1 py-3 text-sm font-bold rounded-lg transition-all duration-200 text-gray-500 hover:bg-gray-50';
+        document.getElementById('tab-order-history').className = 'flex-1 py-3 text-sm font-bold rounded-lg transition-all duration-200 text-gray-500 hover:bg-gray-50';
+        
+        // Show selected content
+        document.getElementById('content-' + tabName).classList.remove('hidden');
+        
+        // Set active button style
+        document.getElementById('tab-' + tabName).className = 'flex-1 py-3 text-sm font-bold rounded-lg transition-all duration-200 bg-primary text-white shadow-md transform scale-[1.02]';
+    }
+</script>
+
+<style>
+    .transition-hover:hover {
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}

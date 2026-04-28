@@ -1,0 +1,427 @@
+{% extends "base.html" %}
+{% block title %}Checkout — Ghoreranna{% endblock %}
+
+{% block content %}
+<div class="py-12 max-w-6xl mx-auto px-4">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+        <div>
+            <p class="text-xs font-bold text-primary uppercase tracking-widest mb-2">Step 2 of 2</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Secure Checkout</h1>
+            <p class="text-gray-500 mt-1">Review your order and choose a payment method.</p>
+        </div>
+        <a href="{% url 'cart' %}" class="inline-flex items-center text-gray-500 hover:text-primary font-semibold transition group text-sm">
+            <svg class="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+            Back to Cart
+        </a>
+    </div>
+
+    <form method="POST" id="checkout-form" novalidate>
+        {% csrf_token %}
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+
+            <!-- ═══ LEFT: Form Panels ═══ -->
+            <div class="lg:col-span-3 space-y-6">
+
+                <!-- ① Delivery Address -->
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        </div>
+                        <h2 class="text-lg font-bold text-gray-900">Delivery Address</h2>
+                    </div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-2">Full Address *</label>
+                    {{ form.delivery_address }}
+                    {% if form.delivery_address.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ form.delivery_address.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- ② Coupon -->
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-9 h-9 bg-green-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                        </div>
+                        <h2 class="text-lg font-bold text-gray-900">Promo Code</h2>
+                    </div>
+                    <div class="flex gap-3">
+                        <div class="flex-grow">
+                            {{ form.coupon_code }}
+                        </div>
+                        <button type="button" onclick="applyCoupon()" class="px-6 py-3 bg-gray-900 text-white text-sm font-bold rounded-xl hover:bg-gray-700 transition whitespace-nowrap">
+                            Apply
+                        </button>
+                    </div>
+                    <p id="coupon-msg" class="text-xs mt-2 hidden"></p>
+                </div>
+
+                <!-- ③ Payment Method -->
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                        </div>
+                        <h2 class="text-lg font-bold text-gray-900">Payment Method</h2>
+                    </div>
+
+                    <!-- Payment Method Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        {% for radio in form.payment_method %}
+                        <label class="payment-label cursor-pointer" data-method="{{ radio.data.value }}">
+                            <input type="radio" name="payment_method" value="{{ radio.data.value }}" class="sr-only payment-radio-input"
+                                {% if radio.data.value == 'Cash' %}checked{% endif %}>
+                            <div class="payment-card rounded-2xl border-2 p-4 text-center transition-all duration-200
+                                {% if radio.data.value == 'Cash' %}border-primary bg-orange-50{% else %}border-gray-200 bg-white hover:border-gray-300{% endif %}">
+                                <div class="w-10 h-10 mx-auto mb-2 rounded-xl flex items-center justify-center
+                                    {% if radio.data.value == 'Cash' %}bg-primary/10{% elif radio.data.value == 'Card' %}bg-blue-50{% else %}bg-pink-50{% endif %}">
+                                    {% if radio.data.value == 'Cash' %}
+                                    <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                                    {% elif radio.data.value == 'Card' %}
+                                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                                    {% else %}
+                                    <svg class="w-5 h-5 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                    {% endif %}
+                                </div>
+                                <p class="text-xs font-bold text-gray-800">
+                                    {% if radio.data.value == 'Cash' %}Cash on Delivery
+                                    {% elif radio.data.value == 'Card' %}Credit/Debit Card
+                                    {% else %}bKash / Nagad
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% if form.payment_method.errors %}
+                        <p class="text-red-500 text-xs mb-4">{{ form.payment_method.errors.0 }}</p>
+                    {% endif %}
+
+                    <!-- ── Card Details Panel ── -->
+                    <div id="card-panel" class="hidden space-y-4 bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 mt-2">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-white font-bold text-sm">Card Details</p>
+                            <div class="flex gap-2 opacity-70">
+                                <!-- Visa-like icon -->
+                                <div class="text-blue-300 font-black italic text-sm">VISA</div>
+                                <div class="w-8 h-5 bg-orange-400 rounded-sm flex items-center justify-center overflow-hidden relative">
+                                    <div class="absolute left-0 w-5 h-5 bg-red-500 rounded-full opacity-80"></div>
+                                    <div class="absolute right-0 w-5 h-5 bg-yellow-400 rounded-full opacity-80"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1 block">Card Number</label>
+                            {{ form.card_number }}
+                            {% if form.card_number.errors %}<p class="text-red-400 text-xs mt-1">{{ form.card_number.errors.0 }}</p>{% endif %}
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1 block">Expiry</label>
+                                {{ form.card_expiry }}
+                                {% if form.card_expiry.errors %}<p class="text-red-400 text-xs mt-1">{{ form.card_expiry.errors.0 }}</p>{% endif %}
+                            </div>
+                            <div>
+                                <label class="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1 block">CVV</label>
+                                {{ form.card_cvv }}
+                                {% if form.card_cvv.errors %}<p class="text-red-400 text-xs mt-1">{{ form.card_cvv.errors.0 }}</p>{% endif %}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-gray-400 text-xs font-semibold uppercase tracking-wider mb-1 block">Name on Card</label>
+                            {{ form.card_name }}
+                            {% if form.card_name.errors %}<p class="text-red-400 text-xs mt-1">{{ form.card_name.errors.0 }}</p>{% endif %}
+                        </div>
+                        <p class="text-[10px] text-gray-500 text-center mt-2">🔒 This is a demo — no real card data is stored or charged.</p>
+                    </div>
+
+                    <!-- ── Mobile Banking Panel ── -->
+                    <div id="mobile-panel" class="hidden space-y-4 bg-gradient-to-br from-pink-600 to-rose-500 rounded-2xl p-6 mt-2">
+                        <p class="text-white font-bold text-sm mb-2">Mobile Banking Number</p>
+                        <p class="text-pink-100 text-xs mb-3">Enter the bKash or Nagad number to send the payment to. No actual transaction will be made.</p>
+                        {{ form.mobile_number }}
+                        {% if form.mobile_number.errors %}<p class="text-red-200 text-xs mt-1">{{ form.mobile_number.errors.0 }}</p>{% endif %}
+                        <p class="text-[10px] text-pink-200 text-center mt-2">🔒 Demo mode — no real payment is processed.</p>
+                    </div>
+
+                    <!-- ── Cash Panel ── -->
+                    <div id="cash-panel" class="space-y-3 bg-orange-50 border border-orange-100 rounded-2xl p-5 mt-2">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-900 text-sm">Pay when your food arrives</p>
+                                <p class="text-gray-500 text-xs">Hand cash to our delivery staff at the door. Please keep the exact change ready.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- END LEFT -->
+
+            <!-- ═══ RIGHT: Order Summary ═══ -->
+            <div class="lg:col-span-2 sticky top-24">
+                <div class="bg-gray-900 text-white rounded-3xl p-8 shadow-2xl">
+                    <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        Order Summary
+                    </h2>
+
+                    <!-- Items -->
+                    <div class="space-y-3 mb-6 max-h-60 overflow-y-auto pr-1 custom-scroll">
+                        {% for item in cart_items %}
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-xl overflow-hidden bg-gray-800 flex-shrink-0">
+                                {% if item.menu.image %}
+                                <img src="{{ item.menu.image.url }}" class="w-full h-full object-cover">
+                                {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-gray-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow min-w-0">
+                                <p class="text-sm font-semibold text-white truncate">{{ item.menu.item_name }}</p>
+                                <p class="text-xs text-gray-500">x{{ item.quantity }}</p>
+                            </div>
+                            <span class="text-sm font-bold text-white flex-shrink-0">৳{{ item.subtotal }}</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="border-t border-white/10 mb-5"></div>
+
+                    <!-- Totals -->
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between text-gray-400 text-sm">
+                            <span>Subtotal</span>
+                            <span id="summary-subtotal" class="font-semibold text-white">৳{{ subtotal }}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-gray-400 text-sm hidden transition-all duration-500 overflow-hidden" id="discount-row">
+                            <span class="flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                Discount
+                            </span>
+                            <span id="discount-val" class="font-bold text-green-400"></span>
+                        </div>
+                        <div class="flex justify-between text-gray-400 text-sm">
+                            <span>Delivery</span>
+                            <span class="text-green-400 font-bold">FREE</span>
+                        </div>
+                        <div class="border-t border-white/10 pt-4 flex justify-between items-end">
+                            <span class="text-lg font-bold">Total</span>
+                            <div class="flex flex-col items-end">
+                                <span id="original-total" class="text-sm text-gray-500 line-through hidden decoration-red-500"></span>
+                                <span id="summary-total" class="text-3xl font-black text-primary transition-all duration-300">৳{{ subtotal }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estimated Time -->
+                    <div class="bg-white/5 rounded-2xl p-4 mb-6 flex items-center gap-3">
+                        <svg class="w-6 h-6 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <div>
+                            <p class="text-white text-sm font-bold">Estimated Delivery</p>
+                            <p class="text-gray-400 text-xs">30–45 minutes after placing order</p>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="place-order-btn"
+                        class="w-full bg-primary text-white font-bold py-4 rounded-2xl hover:bg-orange-600 active:scale-95 transition-all shadow-lg shadow-primary/30 flex items-center justify-center gap-3 relative overflow-hidden">
+                        <span id="btn-text" class="flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            Place Order
+                        </span>
+                        <span id="btn-loading" class="hidden flex items-center gap-2">
+                            <svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                            Processing…
+                        </span>
+                    </button>
+
+                    <p class="text-center text-[10px] text-gray-600 mt-4 uppercase tracking-widest">
+                        🔒 Secured &nbsp;·&nbsp; Demo Payment Mode
+                    </p>
+                </div>
+            </div>
+
+        </div><!-- END GRID -->
+    </form>
+</div>
+
+<style>
+    .custom-scroll::-webkit-scrollbar { width: 4px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+    /* Override card/mobile field colors inside dark panels */
+    #card-panel input {
+        background: rgba(255,255,255,0.08);
+        border-color: rgba(255,255,255,0.12);
+        color: white;
+    }
+    #card-panel input::placeholder { color: rgba(255,255,255,0.3); }
+    #card-panel input:focus { border-color: #FF6B35; box-shadow: 0 0 0 2px rgba(255,107,53,0.25); }
+    #mobile-panel input {
+        background: rgba(255,255,255,0.15);
+        border-color: rgba(255,255,255,0.2);
+        color: white;
+    }
+    #mobile-panel input::placeholder { color: rgba(255,255,255,0.5); }
+    #mobile-panel input:focus { border-color: white; box-shadow: none; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-in { animation: fadeIn 0.4s ease-out forwards; }
+</style>
+
+<script>
+(function () {
+    const subtotal = parseFloat("{{ subtotal }}");
+
+    // ── Payment Method Selection ──────────────────────────────
+    const labels = document.querySelectorAll('.payment-label');
+    const cardPanel = document.getElementById('card-panel');
+    const mobilePanel = document.getElementById('mobile-panel');
+    const cashPanel = document.getElementById('cash-panel');
+
+    function selectPayment(method) {
+        // Reset all card styles
+        labels.forEach(lbl => {
+            const card = lbl.querySelector('.payment-card');
+            card.classList.remove('border-primary', 'bg-orange-50', 'border-blue-400', 'bg-blue-50', 'border-pink-400', 'bg-pink-50');
+            card.classList.add('border-gray-200', 'bg-white');
+        });
+
+        // Style selected
+        const selected = document.querySelector(`.payment-label[data-method="${method}"]`);
+        if (selected) {
+            const card = selected.querySelector('.payment-card');
+            card.classList.remove('border-gray-200');
+            if (method === 'Cash')   card.classList.add('border-primary', 'bg-orange-50');
+            if (method === 'Card')   card.classList.add('border-blue-400', 'bg-blue-50');
+            if (method === 'Online') card.classList.add('border-pink-400', 'bg-pink-50');
+        }
+
+        // Toggle panels
+        cardPanel.classList.toggle('hidden', method !== 'Card');
+        mobilePanel.classList.toggle('hidden', method !== 'Online');
+        cashPanel.classList.toggle('hidden', method !== 'Cash');
+    }
+
+    // Attach listeners
+    labels.forEach(lbl => {
+        lbl.addEventListener('click', () => {
+            const method = lbl.dataset.method;
+            const radio = lbl.querySelector('input[type=radio]');
+            radio.checked = true;
+            selectPayment(method);
+        });
+    });
+
+    // Init on load
+    selectPayment('Cash');
+
+    // ── Card Number Formatting ────────────────────────────────
+    const cardNum = document.getElementById('id_card_number');
+    if (cardNum) {
+        cardNum.addEventListener('input', function () {
+            let val = this.value.replace(/\D/g, '').substring(0, 16);
+            this.value = val.match(/.{1,4}/g)?.join('  ') || val;
+        });
+    }
+
+    // ── Card Expiry Formatting ────────────────────────────────
+    const cardExp = document.getElementById('id_card_expiry');
+    if (cardExp) {
+        cardExp.addEventListener('input', function () {
+            let val = this.value.replace(/\D/g, '').substring(0, 4);
+            if (val.length >= 3) val = val.substring(0,2) + '/' + val.substring(2);
+            this.value = val;
+        });
+    }
+
+    // ── Coupon Apply (AJAX version) ──────────────────────────
+    window.applyCoupon = function () {
+        const input = document.querySelector('[name=coupon_code]');
+        const code = input.value.trim().toUpperCase();
+        const msg = document.getElementById('coupon-msg');
+        const applyBtn = document.querySelector('button[onclick="applyCoupon()"]');
+        
+        if (!code) {
+            msg.className = 'text-xs mt-2 text-gray-400 italic';
+            msg.textContent = 'Please enter a coupon code.';
+            msg.classList.remove('hidden');
+            return;
+        }
+
+        // Visual feedback for loading
+        applyBtn.disabled = true;
+        applyBtn.innerHTML = '<svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>';
+
+        fetch(`/validate-coupon/?code=${encodeURIComponent(code)}`)
+            .then(response => response.json())
+            .then(data => {
+                applyBtn.disabled = false;
+                applyBtn.textContent = 'Apply';
+                
+                if (data.success) {
+                    msg.className = 'text-xs mt-2 text-green-500 font-bold flex items-center gap-1.5 animate-in';
+                    msg.innerHTML = '<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>' + data.message;
+                    input.classList.add('border-green-500', 'bg-green-50');
+                    input.classList.remove('border-gray-200');
+
+                    // Update Summary UI
+                    const row = document.getElementById('discount-row');
+                    const val = document.getElementById('discount-val');
+                    const total = document.getElementById('summary-total');
+                    const originalTotal = document.getElementById('original-total');
+
+                    row.classList.remove('hidden');
+                    row.classList.add('flex', 'animate-in');
+                    val.textContent = `-৳${data.discount}`;
+                    
+                    originalTotal.textContent = `৳${subtotal.toFixed(2)}`;
+                    originalTotal.classList.remove('hidden');
+                    
+                    total.textContent = `৳${data.new_total}`;
+                    total.classList.add('text-green-400');
+                    total.classList.remove('text-primary');
+                } else {
+                    msg.className = 'text-xs mt-2 text-red-500 font-semibold animate-in';
+                    msg.textContent = data.message;
+                    input.classList.add('border-red-500', 'bg-red-50');
+                    input.classList.remove('border-green-500', 'bg-green-50');
+                    
+                    // Reset Summary if it was active
+                    document.getElementById('discount-row').classList.add('hidden');
+                    document.getElementById('original-total').classList.add('hidden');
+                    document.getElementById('summary-total').textContent = `৳${subtotal.toFixed(2)}`;
+                    document.getElementById('summary-total').classList.add('text-primary');
+                    document.getElementById('summary-total').classList.remove('text-green-400');
+                }
+            })
+            .catch(error => {
+                applyBtn.disabled = false;
+                applyBtn.textContent = 'Apply';
+                console.error('Error:', error);
+            });
+    };
+
+    // ── Place Order button loading state ─────────────────────
+    document.getElementById('checkout-form').addEventListener('submit', function () {
+        const btn = document.getElementById('place-order-btn');
+        document.getElementById('btn-text').classList.add('hidden');
+        document.getElementById('btn-loading').classList.remove('hidden');
+        btn.disabled = true;
+    });
+
+})();
+</script>
+{% endblock %}

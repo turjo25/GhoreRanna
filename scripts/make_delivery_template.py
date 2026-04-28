@@ -1,0 +1,427 @@
+import os
+
+html = """\
+{% extends 'base.html' %}
+{% block title %}Delivery Portal - Ghoreranna{% endblock %}
+{% block content %}
+<style>
+  .dl-tab { display:none; }
+  .dl-tab.active { display:block; }
+  .dl-nav-btn { display:flex; align-items:center; gap:12px; width:100%; padding:14px 20px; font-size:.875rem; font-weight:600; color:#6b7280; border-radius:12px; transition:all .15s; text-align:left; background:transparent; border:none; cursor:pointer; }
+  .dl-nav-btn.active { color:#FF6B35; background:#fff7f5; border-right:3px solid #FF6B35; border-radius:12px 0 0 12px; }
+  .dl-nav-btn:not(.active):hover { background:#f9fafb; }
+  .stat-card { background:white; border-radius:1.5rem; padding:1.5rem; border:1px solid #f3f4f6; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+  .badge { display:inline-flex; align-items:center; padding:3px 12px; border-radius:9999px; font-size:.75rem; font-weight:700; }
+  .b-assigned { background:#dbeafe; color:#1d4ed8; }
+  .b-pickedup { background:#fef3c7; color:#b45309; }
+  .b-delivered { background:#d1fae5; color:#065f46; }
+  .b-pending   { background:#f3f4f6; color:#6b7280; }
+</style>
+
+<div class="py-8 max-w-7xl mx-auto px-4">
+
+  <!-- Header -->
+  <div class="mb-8 bg-gradient-to-r from-gray-900 to-gray-800 rounded-3xl p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+    <div class="flex items-center gap-4">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-500 to-orange-400 flex items-center justify-center text-white text-2xl font-black shadow-lg">
+        {{ staff.name|slice:":1"|upper }}
+      </div>
+      <div>
+        <h1 class="text-xl font-black text-white">{{ staff.name }}</h1>
+        <p class="text-orange-300 text-sm font-semibold flex items-center gap-2 mt-1">
+          <span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
+          Delivery Staff &nbsp;&bull;&nbsp; {{ staff.phone }}
+        </p>
+      </div>
+    </div>
+    <div class="flex gap-3 flex-wrap">
+      <div class="text-center bg-white/10 rounded-2xl px-5 py-3">
+        <p class="text-2xl font-black text-white">{{ total_delivered }}</p>
+        <p class="text-xs text-gray-400 font-semibold">Delivered</p>
+      </div>
+      <div class="text-center bg-white/10 rounded-2xl px-5 py-3">
+        <p class="text-2xl font-black text-orange-400">&#2547;{{ total_delivered }}00</p>
+        <p class="text-xs text-gray-400 font-semibold">Earned</p>
+      </div>
+      <div class="text-center bg-white/10 rounded-2xl px-5 py-3">
+        <p class="text-2xl font-black text-white">{{ total_active }}</p>
+        <p class="text-xs text-gray-400 font-semibold">Active</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-6 items-start">
+
+    <!-- Sidebar -->
+    <aside class="w-full lg:w-60 flex-shrink-0">
+      <nav class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
+        <div class="px-5 py-4 border-b border-gray-100">
+          <p class="text-xs font-black text-gray-400 uppercase tracking-widest">My Portal</p>
+        </div>
+        <ul class="py-3 px-3 space-y-1">
+          <li><button onclick="dlTab('dashboard')" id="nav-dashboard" class="dl-nav-btn active">
+            &#128202; <span>Dashboard</span>
+          </button></li>
+          <li><button onclick="dlTab('active')" id="nav-active" class="dl-nav-btn">
+            &#128666; <span class="flex-grow">Active Deliveries</span>
+            {% if total_active %}<span class="bg-orange-100 text-orange-600 text-xs font-black px-2 py-0.5 rounded-full">{{ total_active }}</span>{% endif %}
+          </button></li>
+          <li><button onclick="dlTab('history')" id="nav-history" class="dl-nav-btn">
+            &#128203; <span class="flex-grow">History</span>
+            <span class="bg-gray-100 text-gray-500 text-xs font-black px-2 py-0.5 rounded-full">{{ total_delivered }}</span>
+          </button></li>
+          <li><button onclick="dlTab('profile')" id="nav-profile" class="dl-nav-btn">
+            &#128100; <span>My Profile</span>
+          </button></li>
+        </ul>
+        <div class="px-5 py-4 border-t border-gray-100">
+          <a href="{% url 'logout' %}" class="flex items-center gap-2 text-sm text-red-500 hover:text-red-700 font-semibold py-1 transition">
+            &#128682; Sign Out
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main -->
+    <main class="flex-grow min-w-0 space-y-4">
+
+      <!-- ── DASHBOARD ── -->
+      <div id="tab-dashboard" class="dl-tab active space-y-5">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="stat-card text-center">
+            <p class="text-3xl font-black text-gray-900">{{ total_assigned }}</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mt-1">Assigned</p>
+          </div>
+          <div class="stat-card text-center">
+            <p class="text-3xl font-black text-green-600">{{ total_delivered }}</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mt-1">Completed</p>
+          </div>
+          <div class="stat-card text-center">
+            <p class="text-3xl font-black text-orange-500">{{ total_active }}</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mt-1">Active Now</p>
+          </div>
+          <div class="stat-card text-center">
+            <p class="text-xl font-black text-orange-500">&#2547;{{ total_delivered }}00</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mt-1">Total Earned</p>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-bold text-gray-900">Delivery Success Rate</h3>
+            {% if total_assigned %}
+              <span class="text-2xl font-black text-green-600">{% widthratio total_delivered total_assigned 100 %}%</span>
+            {% else %}
+              <span class="text-2xl font-black text-gray-400">N/A</span>
+            {% endif %}
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
+            {% if total_assigned %}
+            <div class="bg-gradient-to-r from-orange-500 to-green-500 h-3 rounded-full" style="width:{% widthratio total_delivered total_assigned 100 %}%"></div>
+            {% else %}
+            <div class="bg-gray-200 h-3 rounded-full w-0"></div>
+            {% endif %}
+          </div>
+          <p class="text-xs text-gray-400 mt-2">{{ total_delivered }} of {{ total_assigned }} deliveries completed</p>
+        </div>
+
+        <div class="stat-card">
+          <h3 class="font-bold text-gray-900 mb-4">Quick Actions</h3>
+          <div class="grid grid-cols-2 gap-3">
+            <button onclick="dlTab('active')" class="flex items-center gap-3 p-4 bg-orange-50 hover:bg-orange-100 rounded-2xl transition text-left">
+              <span class="text-2xl">&#128666;</span>
+              <div>
+                <p class="font-bold text-gray-900 text-sm">Active Deliveries</p>
+                <p class="text-xs text-gray-400">{{ total_active }} pending</p>
+              </div>
+            </button>
+            <button onclick="dlTab('history')" class="flex items-center gap-3 p-4 bg-green-50 hover:bg-green-100 rounded-2xl transition text-left">
+              <span class="text-2xl">&#9989;</span>
+              <div>
+                <p class="font-bold text-gray-900 text-sm">My History</p>
+                <p class="text-xs text-gray-400">{{ total_delivered }} done</p>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Earnings Breakdown -->
+        <div class="stat-card">
+          <h3 class="font-bold text-gray-900 mb-4">Earnings Summary</h3>
+          <div class="space-y-3">
+            <div class="flex justify-between items-center py-3 border-b border-gray-100">
+              <span class="text-sm text-gray-600 font-semibold">Rate per delivery</span>
+              <span class="font-black text-gray-900">&#2547;100</span>
+            </div>
+            <div class="flex justify-between items-center py-3 border-b border-gray-100">
+              <span class="text-sm text-gray-600 font-semibold">Completed deliveries</span>
+              <span class="font-black text-gray-900">{{ total_delivered }}</span>
+            </div>
+            <div class="flex justify-between items-center py-3">
+              <span class="text-sm font-bold text-gray-900">Total Earned</span>
+              <span class="text-xl font-black text-green-600">&#2547;{{ total_delivered }}00</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ACTIVE DELIVERIES ── -->
+      <div id="tab-active" class="dl-tab">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-gray-900">Active Deliveries</h2>
+              <p class="text-sm text-gray-400 mt-0.5">Orders assigned to you needing delivery.</p>
+            </div>
+            <span class="badge b-assigned">{{ total_active }} Active</span>
+          </div>
+          {% if active_deliveries %}
+          <div class="divide-y divide-gray-100">
+            {% for delivery in active_deliveries %}
+            <div class="px-8 py-6">
+              <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+                <div>
+                  <div class="flex items-center gap-3 mb-2">
+                    <p class="font-black text-gray-900 text-lg">#{{ delivery.order.order_id }}</p>
+                    {% if delivery.delivery_status == 'Assigned' %}
+                      <span class="badge b-assigned">Assigned</span>
+                    {% elif delivery.delivery_status == 'Picked Up' %}
+                      <span class="badge b-pickedup">Picked Up</span>
+                    {% else %}
+                      <span class="badge b-pending">{{ delivery.delivery_status }}</span>
+                    {% endif %}
+                  </div>
+                  <p class="text-sm font-semibold text-gray-700">&#128100; {{ delivery.order.user.name }}</p>
+                  <p class="text-sm text-gray-500 mt-0.5">&#128205; {{ delivery.order.user.address }}</p>
+                  <p class="text-xs text-gray-400 mt-1">&#128222; {{ delivery.order.user.phone }}</p>
+                </div>
+                <div class="sm:text-right">
+                  <p class="text-xl font-black text-orange-500">&#2547;{{ delivery.order.total_amount }}</p>
+                  <p class="text-xs text-gray-400">{{ delivery.order.payment_method }}</p>
+                  <p class="text-xs text-gray-400 mt-1">{{ delivery.order.order_date|date:"N j · g:i a" }}</p>
+                </div>
+              </div>
+              <div class="bg-gray-50 rounded-2xl p-4 mb-4">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2">Items</p>
+                {% for detail in delivery.order.order_details.all %}
+                <div class="flex justify-between text-sm py-1">
+                  <span class="text-gray-700">{{ detail.quantity }}&#215; {{ detail.menu.item_name }}</span>
+                  <span class="font-bold text-gray-900">&#2547;{{ detail.subtotal }}</span>
+                </div>
+                {% endfor %}
+              </div>
+              {% if delivery.delivery_status == 'Assigned' %}
+              <form method="POST" action="{% url 'delivery_update_status' delivery.delivery_id %}">
+                {% csrf_token %}
+                <input type="hidden" name="delivery_status" value="Picked Up">
+                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-black py-3 rounded-2xl transition shadow-md shadow-orange-200">
+                  &#128666; Mark as Picked Up
+                </button>
+              </form>
+              {% elif delivery.delivery_status == 'Picked Up' %}
+              <form method="POST" action="{% url 'delivery_update_status' delivery.delivery_id %}">
+                {% csrf_token %}
+                <input type="hidden" name="delivery_status" value="Delivered">
+                <button type="submit" onclick="return confirm('Confirm delivery for Order #{{ delivery.order.order_id }}?')" class="w-full bg-green-500 hover:bg-green-600 text-white font-black py-3 rounded-2xl transition shadow-md shadow-green-200">
+                  &#9989; Mark as Delivered
+                </button>
+              </form>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="px-8 py-20 text-center">
+            <div class="text-6xl mb-4">&#127881;</div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">All Clear!</h3>
+            <p class="text-gray-400">You have no active deliveries right now.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ── HISTORY ── -->
+      <div id="tab-history" class="dl-tab">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-8 py-6 border-b border-gray-100">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-xl font-bold text-gray-900">Delivery History</h2>
+                <p class="text-sm text-gray-400 mt-0.5">All your completed deliveries and earnings.</p>
+              </div>
+              <div class="text-right">
+                <p class="text-2xl font-black text-green-600">&#2547;{{ total_delivered }}00</p>
+                <p class="text-xs text-gray-400 font-semibold">Total Earned</p>
+              </div>
+            </div>
+          </div>
+          {% if past_deliveries %}
+          <div class="px-8 py-4 bg-green-50 border-b border-green-100">
+            <div class="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <p class="text-xl font-black text-gray-900">{{ total_delivered }}</p>
+                <p class="text-xs text-gray-500 font-semibold">Deliveries</p>
+              </div>
+              <div>
+                <p class="text-xl font-black text-green-600">&#2547;100</p>
+                <p class="text-xs text-gray-500 font-semibold">Per Delivery</p>
+              </div>
+              <div>
+                <p class="text-xl font-black text-orange-500">&#2547;{{ total_delivered }}00</p>
+                <p class="text-xs text-gray-500 font-semibold">Total</p>
+              </div>
+            </div>
+          </div>
+          <div class="divide-y divide-gray-100">
+            {% for delivery in past_deliveries %}
+            <div class="px-8 py-5 hover:bg-gray-50 transition">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-start gap-4">
+                  <div class="w-11 h-11 rounded-2xl bg-green-100 text-green-600 flex items-center justify-center text-lg flex-shrink-0">&#9989;</div>
+                  <div>
+                    <p class="font-bold text-gray-900">Order #{{ delivery.order.order_id }}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">&#128100; {{ delivery.order.user.name }}</p>
+                    <p class="text-xs text-gray-400">
+                      {% if delivery.delivery_date %}{{ delivery.delivery_date|date:"N j, Y · g:i a" }}{% else %}{{ delivery.order.order_date|date:"N j, Y" }}{% endif %}
+                    </p>
+                    <p class="text-xs text-gray-500 mt-1 truncate max-w-xs">
+                      {% for detail in delivery.order.order_details.all %}{{ detail.menu.item_name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                    </p>
+                  </div>
+                </div>
+                <div class="sm:text-right flex-shrink-0">
+                  <p class="text-base font-black text-gray-900">&#2547;{{ delivery.order.total_amount }}</p>
+                  <p class="text-sm font-bold text-green-600">+&#2547;100 earned</p>
+                  <span class="badge b-delivered mt-1">Delivered</span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="px-8 py-20 text-center">
+            <div class="text-6xl mb-4">&#128203;</div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">No History Yet</h3>
+            <p class="text-gray-400">Completed deliveries and earnings will show here.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ── MY PROFILE ── -->
+      <div id="tab-profile" class="dl-tab space-y-4">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-gray-900">My Profile</h2>
+              <p class="text-sm text-gray-400 mt-0.5">Your personal information.</p>
+            </div>
+            <button id="dl-edit-btn" onclick="toggleProfileEdit()" class="text-sm font-bold px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition text-gray-700">&#9998; Edit</button>
+          </div>
+          <!-- View Mode -->
+          <div id="dl-profileView" class="px-8 py-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Full Name</p>
+                <p class="text-lg font-semibold text-gray-900">{{ staff.name }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Role</p>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-orange-100 text-orange-600">Delivery Staff</span>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Email</p>
+                <p class="text-base text-gray-700">{{ staff.email }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Phone</p>
+                <p class="text-base text-gray-700">{{ staff.phone }}</p>
+              </div>
+              <div class="sm:col-span-2">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Address</p>
+                <p class="text-base text-gray-700 bg-gray-50 rounded-xl px-4 py-3">{{ staff.address }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Status</p>
+                <span class="inline-flex items-center gap-1.5 text-sm font-bold {% if staff.status == 'Active' %}text-green-600{% else %}text-red-500{% endif %}">
+                  <span class="w-2 h-2 rounded-full {% if staff.status == 'Active' %}bg-green-400{% else %}bg-red-400{% endif %}"></span>
+                  {{ staff.status }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <!-- Edit Mode -->
+          <div id="dl-profileEdit" class="px-8 py-8 hidden">
+            <form method="POST" action="{% url 'delivery_dashboard' %}">
+              {% csrf_token %}
+              <input type="hidden" name="edit_profile" value="1">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Email (read-only)</label>
+                  <input type="email" value="{{ staff.email }}" disabled class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-400 cursor-not-allowed">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Full Name</label>
+                  <input type="text" name="name" value="{{ staff.name }}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 transition">
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Phone</label>
+                  <input type="text" name="phone" value="{{ staff.phone }}" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 transition">
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Address</label>
+                  <textarea name="address" rows="3" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:border-orange-400 transition">{{ staff.address }}</textarea>
+                </div>
+              </div>
+              <div class="mt-6 flex gap-3">
+                <button type="button" onclick="toggleProfileEdit()" class="px-6 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition text-sm">Cancel</button>
+                <button type="submit" class="px-8 py-3 bg-orange-500 text-white font-bold rounded-xl hover:bg-orange-600 transition shadow-sm text-sm">Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+          <h3 class="font-bold text-gray-900 mb-4">Account Actions</h3>
+          <a href="{% url 'logout' %}" class="flex items-center gap-3 px-5 py-4 bg-red-50 hover:bg-red-100 rounded-2xl transition border border-red-100">
+            <span class="text-base">&#128682;</span>
+            <span class="text-sm font-semibold text-red-600">Sign Out of Portal</span>
+          </a>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+const DL_TABS = ['dashboard','active','history','profile'];
+function dlTab(name) {
+  DL_TABS.forEach(t => {
+    const tab = document.getElementById('tab-' + t);
+    const nav = document.getElementById('nav-' + t);
+    if (tab) tab.classList.remove('active');
+    if (nav) nav.classList.remove('active');
+  });
+  const el  = document.getElementById('tab-' + name);
+  const nav = document.getElementById('nav-' + name);
+  if (el)  el.classList.add('active');
+  if (nav) nav.classList.add('active');
+  if (window.innerWidth < 1024 && el) el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function toggleProfileEdit() {
+  document.getElementById('dl-profileView').classList.toggle('hidden');
+  document.getElementById('dl-profileEdit').classList.toggle('hidden');
+  const editing = !document.getElementById('dl-profileEdit').classList.contains('hidden');
+  document.getElementById('dl-edit-btn').textContent = editing ? 'Cancel' : '✏ Edit';
+}
+const urlParams = new URLSearchParams(window.location.search);
+const tabParam  = urlParams.get('tab');
+if (tabParam && DL_TABS.includes(tabParam)) dlTab(tabParam);
+</script>
+{% endblock %}
+"""
+
+out_path = os.path.join('templates', 'delivery_dashboard.html')
+with open(out_path, 'w', encoding='utf-8') as f:
+    f.write(html)
+print(f"Written {len(html)} chars to {out_path}")

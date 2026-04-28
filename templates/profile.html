@@ -1,0 +1,1911 @@
+{% extends 'base.html' %}
+{% block title %}My Profile — Ghoreranna{% endblock %}
+
+{% block content %}
+
+{% if user.role == 'Student' or user.role == 'Bachelor Employee' %}
+{# ═══════════════════════════════════════════════════════════════════ #}
+{# CUSTOMER PROFILE — full sidebar layout #}
+{# ═══════════════════════════════════════════════════════════════════ #}
+
+<div class="py-10 max-w-7xl mx-auto px-4">
+
+  <!-- Top greeting banner -->
+  <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <!-- Avatar -->
+      <div
+        class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center flex-shrink-0 shadow-lg shadow-orange-200">
+        <span class="text-2xl font-black text-white">{{ user.name|slice:":1"|upper }}</span>
+      </div>
+      <div>
+        <h1 class="text-2xl font-extrabold text-gray-900">{{ user.name }}</h1>
+        <p class="text-sm text-gray-500 flex items-center gap-1.5 mt-0.5">
+          <span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
+          {{ user.role }} &nbsp;·&nbsp; {{ user.email }}
+        </p>
+      </div>
+    </div>
+    <!-- Quick stats strip -->
+    <div class="flex gap-4">
+      <div class="bg-white rounded-2xl px-5 py-3 shadow-sm border border-gray-100 text-center">
+        <p class="text-2xl font-black text-gray-900">{{ ordered_food_count }}</p>
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Orders</p>
+      </div>
+      <div class="bg-white rounded-2xl px-5 py-3 shadow-sm border border-gray-100 text-center">
+        <p class="text-2xl font-black text-green-600">{{ successful_order_count }}</p>
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Delivered</p>
+      </div>
+      <div class="bg-white rounded-2xl px-5 py-3 shadow-sm border border-gray-100 text-center">
+        <p class="text-xl font-black text-primary">৳{{ total_spent|floatformat:0 }}</p>
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Spent</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-6 items-start">
+
+    <!-- ══════════════ LEFT SIDEBAR ══════════════ -->
+    <aside class="w-full lg:w-64 flex-shrink-0">
+      <nav class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
+
+        <!-- Nav label -->
+        <div class="px-5 py-4 border-b border-gray-100">
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">My Account</p>
+        </div>
+
+        <ul class="py-2">
+          <!-- Profile Info -->
+          <li>
+            <button onclick="switchTab('profile')" id="nav-profile"
+              class="sidebar-nav-btn w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold transition-all active-nav">
+              <div class="w-8 h-8 rounded-xl flex items-center justify-center bg-primary/10 text-primary flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              Profile Info
+            </button>
+          </li>
+
+          <!-- Order Tracking -->
+          <li>
+            <button onclick="switchTab('tracking')" id="nav-tracking"
+              class="sidebar-nav-btn w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold transition-all">
+              <div class="w-8 h-8 rounded-xl flex items-center justify-center bg-blue-50 text-blue-500 flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span class="flex-grow text-left">Order Tracking</span>
+              {% if active_order %}
+              <span class="w-2 h-2 rounded-full bg-primary animate-pulse flex-shrink-0"></span>
+              {% endif %}
+            </button>
+          </li>
+
+          <!-- Order History -->
+          <li>
+            <button onclick="switchTab('history')" id="nav-history"
+              class="sidebar-nav-btn w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold transition-all">
+              <div
+                class="w-8 h-8 rounded-xl flex items-center justify-center bg-purple-50 text-purple-500 flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <span class="flex-grow text-left">Order History</span>
+              <span class="text-xs bg-gray-100 text-gray-500 font-bold px-2 py-0.5 rounded-full flex-shrink-0">{{ ordered_food_count }}</span>
+            </button>
+          </li>
+
+          <!-- Coupons -->
+          <li>
+            <button onclick="switchTab('coupons')" id="nav-coupons"
+              class="sidebar-nav-btn w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold transition-all">
+              <div class="w-8 h-8 rounded-xl flex items-center justify-center bg-green-50 text-green-500 flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+              </div>
+              <span class="flex-grow text-left">Coupons</span>
+              {% if available_coupons %}
+              <span class="text-xs bg-green-100 text-green-600 font-bold px-2 py-0.5 rounded-full flex-shrink-0">{{ available_coupons|length }}</span>
+              {% endif %}
+            </button>
+          </li>
+
+          <!-- Account Settings -->
+          <li>
+            <button onclick="switchTab('settings')" id="nav-settings"
+              class="sidebar-nav-btn w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold transition-all">
+              <div class="w-8 h-8 rounded-xl flex items-center justify-center bg-gray-100 text-gray-500 flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              Account Settings
+            </button>
+          </li>
+        </ul>
+
+        <!-- Divider -->
+        <div class="my-1 border-t border-gray-100"></div>
+        <div class="px-5 py-4">
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Quick Links</p>
+          <a href="{% url 'menu_list' %}"
+            class="flex items-center gap-2 text-sm text-gray-600 hover:text-primary font-semibold py-2 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+            Browse Menu
+          </a>
+          <a href="{% url 'cart' %}"
+            class="flex items-center gap-2 text-sm text-gray-600 hover:text-primary font-semibold py-2 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            My Cart
+          </a>
+          <a href="{% url 'logout' %}"
+            class="flex items-center gap-2 text-sm text-red-500 hover:text-red-700 font-semibold py-2 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Sign Out
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ══════════════ MAIN CONTENT ══════════════ -->
+    <main class="flex-grow min-w-0 space-y-0">
+
+      {# ─── TAB: Profile Info ─── #}
+      <div id="tab-profile" class="tab-panel">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-gray-900">Personal Information</h2>
+              <p class="text-sm text-gray-400 mt-0.5">View and update your account details.</p>
+            </div>
+            <button type="button" onclick="toggleEditMode()" id="edit-btn"
+              class="flex items-center gap-2 text-sm font-semibold px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition text-gray-700">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Edit
+            </button>
+          </div>
+
+          <!-- View Mode -->
+          <div id="profileView" class="px-8 py-8 {% if form.errors %}hidden{% endif %}">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Full Name</p>
+                <p class="text-lg font-semibold text-gray-900">{{ user.name }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Role</p>
+                <span
+                  class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-orange-100 text-primary">{{ user.role }}</span>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Email Address</p>
+                <p class="text-base text-gray-700">{{ user.email }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Phone</p>
+                <p class="text-base text-gray-700">{{ user.phone }}</p>
+              </div>
+              <div class="sm:col-span-2">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Delivery Address</p>
+                <p class="text-base text-gray-700 bg-gray-50 rounded-xl px-4 py-3">{{ user.address }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Account Status</p>
+                <span class="inline-flex items-center gap-1.5 text-sm font-bold
+                  {% if user.status == 'Active' %}text-green-600{% else %}text-red-500{% endif %}">
+                  <span
+                    class="w-2 h-2 rounded-full {% if user.status == 'Active' %}bg-green-400{% else %}bg-red-400{% endif %}"></span>
+                  {{ user.status }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Mode -->
+          <div id="profileEdit" class="px-8 py-8 {% if not form.errors %}hidden{% endif %}">
+            <form method="POST" action="{% url 'profile' %}">
+              {% csrf_token %}
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Email
+                    (read-only)</label>
+                  <input type="email" value="{{ user.email }}" disabled
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-400 cursor-not-allowed">
+                </div>
+                {% for field in form %}
+                <div {% if field.name == 'address' %}class="sm:col-span-2" {% endif %}>
+                  <label for="{{ field.id_for_label }}"
+                    class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">{{ field.label }}</label>
+                  {{ field }}
+                  {% if field.errors %}<p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>{% endif %}
+                </div>
+                {% endfor %}
+              </div>
+              <div class="mt-8 flex gap-3">
+                <button type="button" onclick="toggleEditMode()"
+                  class="px-6 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition text-sm">
+                  Cancel
+                </button>
+                <button type="submit"
+                  class="px-8 py-3 bg-primary text-white font-bold rounded-xl hover:bg-orange-600 transition shadow-sm shadow-orange-200 text-sm">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      {# ─── TAB: Order Tracking ─── #}
+      <div id="tab-tracking" class="tab-panel hidden">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-8 py-6 border-b border-gray-100">
+            <h2 class="text-xl font-bold text-gray-900">Order Tracking</h2>
+            <p class="text-sm text-gray-400 mt-0.5">Live status of your most recent active order.</p>
+          </div>
+
+          {% if active_order %}
+          <div class="px-8 py-8">
+            <!-- Order header -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Order Reference</p>
+                <p class="text-3xl font-black text-gray-900">#{{ active_order.order_id }}</p>
+              </div>
+              <div class="sm:text-right">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Placed</p>
+                <p class="font-semibold text-gray-700">{{ active_order.order_date|date:"N j, Y" }}</p>
+                <p class="text-sm text-gray-400">{{ active_order.order_date|date:"g:i a" }}</p>
+              </div>
+            </div>
+
+            <!-- Status badge -->
+            <div class="mb-8">
+              <span class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold
+                {% if active_order.order_status == 'Pending' %}bg-yellow-100 text-yellow-700
+                {% elif active_order.order_status == 'Accepted' %}bg-blue-100 text-blue-700
+                {% elif active_order.order_status == 'Preparing' %}bg-orange-100 text-orange-700
+                {% elif active_order.order_status == 'Out for Delivery' %}bg-indigo-100 text-indigo-700
+                {% elif active_order.order_status == 'Handed Over' %}bg-blue-100 text-blue-700
+                {% else %}bg-gray-100 text-gray-600{% endif %}">
+                <span class="w-2 h-2 rounded-full animate-pulse
+                  {% if active_order.order_status == 'Pending' %}bg-yellow-500
+                  {% elif active_order.order_status == 'Accepted' %}bg-blue-500
+                  {% elif active_order.order_status == 'Preparing' %}bg-orange-500
+                  {% elif active_order.order_status == 'Out for Delivery' %}bg-indigo-500
+                  {% elif active_order.order_status == 'Handed Over' %}bg-blue-500
+                  {% else %}bg-gray-400{% endif %}"></span>
+                {{ active_order.order_status }}
+              </span>
+            </div>
+
+            <!-- Visual Timeline -->
+            {% with status=active_order.order_status %}
+            <div class="relative mb-8">
+              <!-- Progress bar track -->
+              <div class="absolute top-5 left-5 right-5 h-0.5 bg-gray-200 z-0"></div>
+              <!-- Progress bar fill -->
+              <div class="absolute top-5 left-5 h-0.5 z-0 bg-primary transition-all duration-700
+                {% if status == 'Pending' %}w-0
+                {% elif status == 'Accepted' %}w-1/4
+                {% elif status == 'Preparing' %}w-2/4
+                {% elif status == 'Out for Delivery' %}w-3/4
+                {% elif status == 'Handed Over' %}w-[87.5%]
+                {% else %}w-full{% endif %}"></div>
+
+              <div class="relative z-10 grid grid-cols-4 gap-2">
+                {% for step, label, icon in tracking_steps %}
+                {% empty %}
+                <!-- Steps rendered manually below -->
+                {% endfor %}
+
+                <!-- Step 1: Pending -->
+                <div class="flex flex-col items-center text-center">
+                  <div
+                    class="w-10 h-10 rounded-full border-2 flex items-center justify-center mb-2
+                    {% if status == 'Pending' or status == 'Accepted' or status == 'Preparing' or status == 'Out for Delivery' or status == 'Delivered' %}border-primary bg-primary text-white{% else %}border-gray-200 bg-white text-gray-300{% endif %}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p class="text-xs font-bold text-gray-600">Confirmed</p>
+                </div>
+                <!-- Step 2: Preparing -->
+                <div class="flex flex-col items-center text-center">
+                  <div
+                    class="w-10 h-10 rounded-full border-2 flex items-center justify-center mb-2
+                    {% if status == 'Accepted' or status == 'Preparing' or status == 'Out for Delivery' or status == 'Delivered' %}border-primary bg-primary text-white{% else %}border-gray-200 bg-white text-gray-300{% endif %}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                  </div>
+                  <p class="text-xs font-bold text-gray-600">Preparing</p>
+                </div>
+                <!-- Step 3: Out for Delivery -->
+                <div class="flex flex-col items-center text-center">
+                  <div
+                    class="w-10 h-10 rounded-full border-2 flex items-center justify-center mb-2
+                    {% if status == 'Out for Delivery' or status == 'Delivered' %}border-primary bg-primary text-white{% else %}border-gray-200 bg-white text-gray-300{% endif %}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <p class="text-xs font-bold text-gray-600">On the Way</p>
+                </div>
+                <!-- Step 4: Delivered -->
+                <div class="flex flex-col items-center text-center">
+                  <div
+                    class="w-10 h-10 rounded-full border-2 flex items-center justify-center mb-2
+                    {% if status == 'Delivered' %}border-green-500 bg-green-500 text-white{% elif status == 'Handed Over' %}border-blue-500 bg-blue-500 text-white animate-bounce{% else %}border-gray-200 bg-white text-gray-300{% endif %}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                  </div>
+                  <p class="text-xs font-bold text-gray-600">{% if status == 'Handed Over' %}Confirm?{% else %}Delivered{% endif %}</p>
+                </div>
+              </div>
+            </div>
+            {% endwith %}
+
+            <!-- Estimated delivery -->
+            {% if active_order.delivery_time %}
+            <div class="bg-orange-50 border border-orange-100 rounded-2xl p-4 flex items-center gap-3 mb-6">
+              <svg class="w-5 h-5 text-primary flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div>
+                <p class="text-xs font-bold text-orange-800 uppercase tracking-wide">Estimated Delivery</p>
+                <p class="text-sm font-semibold text-gray-800">{{ active_order.delivery_time|date:"g:i a, N j" }}</p>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Items in this order -->
+            <div>
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Items</p>
+              <div class="space-y-3">
+                {% for detail in active_order.order_details.all %}
+                <div class="flex items-center gap-3 bg-gray-50 rounded-xl p-3">
+                  <div class="w-10 h-10 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                    {% if detail.menu.image %}
+                    <img src="{{ detail.menu.image.url }}" class="w-full h-full object-cover">
+                    {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-gray-400">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    {% endif %}
+                  </div>
+                  <div class="flex-grow min-w-0">
+                    <p class="text-sm font-semibold text-gray-900 truncate">{{ detail.menu.item_name }}</p>
+                    <p class="text-xs text-gray-400">x{{ detail.quantity }}</p>
+                  </div>
+                  <span class="text-sm font-bold text-gray-900 flex-shrink-0">৳{{ detail.subtotal }}</span>
+                </div>
+                {% endfor %}
+              </div>
+              <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                <span class="text-sm font-semibold text-gray-500">Total</span>
+                <span class="text-xl font-black text-primary">৳{{ active_order.total_amount }}</span>
+              </div>
+            </div>
+
+            {% if active_order.order_status == 'Pending' or active_order.order_status == 'Accepted' %}
+            <div class="mt-4 border-t border-gray-100 pt-6">
+              <form method="POST" action="{% url 'cancel_order' active_order.order_id %}" onsubmit="return confirm('Are you sure you want to cancel this order?')">
+                {% csrf_token %}
+                <button type="submit"
+                  class="w-full bg-white border-2 border-red-100 text-red-600 font-bold py-3 px-8 rounded-xl hover:bg-red-50 hover:border-red-200 transition flex items-center justify-center gap-2 group">
+                  <svg class="w-5 h-5 text-red-400 group-hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  Cancel Order
+                </button>
+              </form>
+              <p class="text-[10px] text-gray-400 text-center mt-2 italic">Orders can only be cancelled before preparation starts.</p>
+            </div>
+            {% endif %}
+
+            <!-- Action for Customer to confirm receipt -->
+            {% if active_order.order_status == 'Handed Over' %}
+            <div class="mt-8 border-t border-gray-100 pt-6">
+              <div class="bg-green-50 border border-green-200 rounded-2xl p-5 text-center">
+                <h4 class="text-green-800 font-bold mb-2">Has your food arrived?</h4>
+                <p class="text-sm text-green-700 mb-4">Please confirm that you have successfully received your order
+                  from the rider.</p>
+                <form method="POST" action="{% url 'mark_order_delivered' active_order.order_id %}">
+                  {% csrf_token %}
+                  <button type="submit"
+                    class="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-8 rounded-xl transition shadow-md shadow-green-200 w-full sm:w-auto inline-flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    I Received It!
+                  </button>
+                </form>
+              </div>
+            </div>
+            {% endif %}
+
+          </div>
+
+          {% else %}
+          <!-- No active order -->
+          <div class="px-8 py-16 text-center">
+            <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-5 text-gray-300">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">No Active Orders</h3>
+            <p class="text-gray-400 mb-8 max-w-xs mx-auto">You don't have any orders in progress right now.</p>
+            <a href="{% url 'menu_list' %}"
+              class="inline-flex items-center gap-2 bg-primary text-white font-bold px-8 py-3.5 rounded-2xl hover:bg-orange-600 transition shadow-md shadow-orange-200">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Order Now
+            </a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {# ─── TAB: Order History ─── #}
+      <div id="tab-history" class="tab-panel hidden">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-gray-900">Order History</h2>
+              <p class="text-sm text-gray-400 mt-0.5">All your past and current orders.</p>
+            </div>
+            <a href="{% url 'menu_list' %}"
+              class="text-sm font-bold text-primary hover:text-orange-600 transition flex items-center gap-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+              Order Again
+            </a>
+          </div>
+
+          {% if order_history %}
+          <div class="divide-y divide-gray-100">
+            {% for order in order_history %}
+            <div class="px-8 py-5 hover:bg-gray-50 transition group">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <!-- Left: icon + info -->
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0
+                    {% if order.order_status == 'Delivered' %}bg-green-100 text-green-600
+                    {% elif order.order_status == 'Cancelled' %}bg-red-100 text-red-500
+                    {% elif order.order_status == 'Pending' %}bg-yellow-100 text-yellow-600
+                    {% else %}bg-orange-100 text-primary{% endif %}">
+                    {% if order.order_status == 'Delivered' %}
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {% elif order.order_status == 'Cancelled' %}
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    {% else %}
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {% endif %}
+                  </div>
+                  <div>
+                    <p class="font-bold text-gray-900">Order #{{ order.order_id }}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ order.order_date|date:"N j, Y · g:i a" }}</p>
+                    <!-- Items summary -->
+                    <p class="text-xs text-gray-500 mt-1.5">
+                      {% for detail in order.order_details.all %}{{ detail.menu.item_name }}{% if not forloop.last %},
+                      {% endif %}{% endfor %}
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Right: amount + status + payment -->
+                <div class="flex items-center gap-4 sm:flex-col sm:items-end">
+                  <p class="text-lg font-black text-gray-900">৳{{ order.total_amount }}</p>
+                  <div class="flex gap-2 flex-wrap justify-end">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold
+                      {% if order.order_status == 'Delivered' %}bg-green-100 text-green-700
+                      {% elif order.order_status == 'Cancelled' %}bg-red-100 text-red-600
+                      {% elif order.order_status == 'Pending' %}bg-yellow-100 text-yellow-700
+                      {% elif order.order_status == 'Accepted' %}bg-blue-100 text-blue-700
+                      {% elif order.order_status == 'Out for Delivery' %}bg-indigo-100 text-indigo-700
+                      {% else %}bg-orange-100 text-primary{% endif %}">
+                      {{ order.order_status }}
+                    </span>
+                    <span
+                      class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
+                      {{ order.payment_method }}
+                    </span>
+                  </div>
+                  {% if order.coupon %}
+                  <p class="text-xs text-green-600 font-semibold">🎟 {{ order.coupon.code }} applied</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+
+          {% else %}
+          <div class="px-8 py-16 text-center">
+            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-300">
+              <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-700 mb-1">No orders yet</h3>
+            <p class="text-gray-400 text-sm">Your order history will appear here once you place an order.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {# ─── TAB: Coupons ─── #}
+      <div id="tab-coupons" class="tab-panel hidden">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-8 py-6 border-b border-gray-100">
+            <h2 class="text-xl font-bold text-gray-900">Available Coupons</h2>
+            <p class="text-sm text-gray-400 mt-0.5">Use these codes at checkout to get a discount.</p>
+          </div>
+
+          <div class="px-8 py-8">
+            {% if available_coupons %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {% for coupon in available_coupons %}
+              <div
+                class="relative overflow-hidden rounded-2xl border-2 border-dashed border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 p-5 group hover:border-green-400 transition-all">
+                <!-- Decorative circles -->
+                <div class="absolute -right-4 -top-4 w-16 h-16 bg-green-100 rounded-full opacity-50"></div>
+                <div class="absolute -right-2 -bottom-4 w-10 h-10 bg-emerald-100 rounded-full opacity-50"></div>
+
+                <div class="relative">
+                  <div class="flex items-start justify-between mb-3">
+                    <div class="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center">
+                      <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                      </svg>
+                    </div>
+                    <span class="text-2xl font-black text-green-700">{{ coupon.discount_percentage|floatformat:0 }}%
+                      OFF</span>
+                  </div>
+
+                  <!-- Coupon code -->
+                  <div
+                    class="bg-white rounded-xl px-4 py-2.5 flex items-center justify-between mb-3 border border-green-100">
+                    <span class="font-mono font-black text-gray-800 tracking-widest text-sm">{{ coupon.code }}</span>
+                    <button onclick="copyCode('{{ coupon.code }}')"
+                      class="text-xs text-green-600 font-bold hover:text-green-800 transition flex items-center gap-1">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                      </svg>
+                      Copy
+                    </button>
+                  </div>
+
+                  <p class="text-xs text-gray-500 font-semibold">
+                    Expires: {{ coupon.expiry_date|date:"N j, Y" }}
+                  </p>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+
+            <!-- Usage hint -->
+            <div class="mt-6 bg-blue-50 border border-blue-100 rounded-2xl p-4 flex items-start gap-3">
+              <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p class="text-sm text-blue-700">Enter the coupon code in the <strong>Promo Code</strong> field on the
+                checkout page to apply your discount.</p>
+            </div>
+
+            {% else %}
+            <div class="py-12 text-center">
+              <div
+                class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-200">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                </svg>
+              </div>
+              <h3 class="text-lg font-bold text-gray-700 mb-1">No coupons available</h3>
+              <p class="text-gray-400 text-sm">Check back soon — new offers are added regularly!</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      {# ─── TAB: Account Settings ─── #}
+      <div id="tab-settings" class="tab-panel hidden">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-8 py-6 border-b border-gray-100">
+            <h2 class="text-xl font-bold text-gray-900">Account Settings</h2>
+            <p class="text-sm text-gray-400 mt-0.5">Manage your account preferences and security.</p>
+          </div>
+          <div class="px-8 py-8 space-y-6">
+
+            <!-- Account overview card -->
+            <div class="bg-gray-50 rounded-2xl p-5 flex items-center gap-4">
+              <div
+                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center text-white text-xl font-black shadow-md">
+                {{ user.name|slice:":1"|upper }}
+              </div>
+              <div>
+                <p class="font-bold text-gray-900">{{ user.name }}</p>
+                <p class="text-sm text-gray-500">{{ user.email }}</p>
+                <span class="inline-flex items-center gap-1 text-xs font-bold mt-1
+                  {% if user.status == 'Active' %}text-green-600{% else %}text-red-500{% endif %}">
+                  <span
+                    class="w-1.5 h-1.5 rounded-full {% if user.status == 'Active' %}bg-green-400{% else %}bg-red-400{% endif %}"></span>
+                  Account {{ user.status }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Stats summary -->
+            <div class="grid grid-cols-3 gap-4">
+              <div class="bg-gray-50 rounded-2xl p-4 text-center">
+                <p class="text-2xl font-black text-gray-900">{{ ordered_food_count }}</p>
+                <p class="text-xs text-gray-400 font-semibold mt-1">Total Orders</p>
+              </div>
+              <div class="bg-green-50 rounded-2xl p-4 text-center">
+                <p class="text-2xl font-black text-green-700">{{ successful_order_count }}</p>
+                <p class="text-xs text-gray-400 font-semibold mt-1">Delivered</p>
+              </div>
+              <div class="bg-red-50 rounded-2xl p-4 text-center">
+                <p class="text-2xl font-black text-red-500">{{ cancelled_order_count }}</p>
+                <p class="text-xs text-gray-400 font-semibold mt-1">Cancelled</p>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="space-y-3">
+              <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Actions</p>
+
+              <button onclick="switchTab('profile')"
+                class="w-full flex items-center justify-between px-5 py-4 bg-gray-50 hover:bg-gray-100 rounded-2xl transition group">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center text-primary">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </div>
+                  <span class="text-sm font-semibold text-gray-700">Edit Profile Information</span>
+                </div>
+                <svg class="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              <a href="{% url 'menu_list' %}"
+                class="w-full flex items-center justify-between px-5 py-4 bg-gray-50 hover:bg-gray-100 rounded-2xl transition group">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center text-blue-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                  </div>
+                  <span class="text-sm font-semibold text-gray-700">Browse Menu</span>
+                </div>
+                <svg class="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+
+              <a href="{% url 'logout' %}"
+                class="w-full flex items-center justify-between px-5 py-4 bg-red-50 hover:bg-red-100 rounded-2xl transition group border border-red-100">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 bg-red-100 rounded-xl flex items-center justify-center text-red-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                  </div>
+                  <span class="text-sm font-semibold text-red-600">Sign Out</span>
+                </div>
+                <svg class="w-4 h-4 text-red-300 group-hover:translate-x-1 transition-transform" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main><!-- END MAIN -->
+  </div><!-- END FLEX -->
+</div>
+
+<!-- ── Sidebar JS ── -->
+<style>
+  .sidebar-nav-btn {
+    color: #6b7280;
+  }
+
+  .sidebar-nav-btn.active-nav {
+    color: #FF6B35;
+    background-color: #fff7f5;
+    border-right: 3px solid #FF6B35;
+  }
+
+  .sidebar-nav-btn:not(.active-nav):hover {
+    background-color: #f9fafb;
+  }
+</style>
+
+<script>
+  const TABS = ['profile', 'tracking', 'history', 'coupons', 'settings'];
+
+  function switchTab(name) {
+    TABS.forEach(t => {
+      document.getElementById('tab-' + t).classList.add('hidden');
+      document.getElementById('nav-' + t).classList.remove('active-nav');
+    });
+    document.getElementById('tab-' + name).classList.remove('hidden');
+    document.getElementById('nav-' + name).classList.add('active-nav');
+    // Scroll to top of content on mobile
+    if (window.innerWidth < 1024) {
+      document.getElementById('tab-' + name).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  function toggleEditMode() {
+    document.getElementById('profileView').classList.toggle('hidden');
+    document.getElementById('profileEdit').classList.toggle('hidden');
+    const btn = document.getElementById('edit-btn');
+    const isEditing = !document.getElementById('profileEdit').classList.contains('hidden');
+    btn.textContent = isEditing ? 'Cancel' : '✏ Edit';
+  }
+
+  function copyCode(code) {
+    navigator.clipboard.writeText(code).then(() => {
+      // Brief visual feedback
+      event.target.closest('button').textContent = '✓ Copied!';
+      setTimeout(() => { location.reload(); }, 1500);
+    });
+  }
+
+  // Auto-open tab based on URL parameter (for Navbar "Orders" link)
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabParam = urlParams.get('tab');
+  if (tabParam && TABS.includes(tabParam)) {
+    switchTab(tabParam);
+  } else if (!tabParam) {
+    // Pulse tracking nav if there is an active order but we're on profile
+    {% if active_order %}
+    // logic can go here if needed
+    {% endif %}
+  }
+
+  // If form had errors, open the profile tab and show edit form
+  {% if form.errors %}
+  switchTab('profile');
+  document.getElementById('profileView').classList.add('hidden');
+  document.getElementById('profileEdit').classList.remove('hidden');
+  {% endif %}
+</script>
+
+{% elif user.role == 'Home Cook' %}
+{# ═══════════════════════════════════════════════════════════════════ #}
+{# HOME COOK PROFILE — sidebar layout with order tracking #}
+{# ═══════════════════════════════════════════════════════════════════ #}
+
+<div class="py-10 max-w-7xl mx-auto px-4">
+
+  <!-- Top greeting banner -->
+  <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="flex items-center gap-4">
+      <!-- Avatar -->
+      <div
+        class="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center flex-shrink-0 shadow-lg shadow-orange-200">
+        <span class="text-2xl font-black text-white">👨‍🍳</span>
+      </div>
+      <div>
+        <h1 class="text-2xl font-extrabold text-gray-900">{{ user.name }}</h1>
+        <p class="text-sm text-gray-500 flex items-center gap-1.5 mt-0.5">
+          <span class="w-2 h-2 rounded-full bg-green-400 inline-block"></span>
+          {{ user.role }} &nbsp;·&nbsp; {{ user.email }}
+        </p>
+      </div>
+    </div>
+    <!-- Quick stats strip -->
+    <div class="flex gap-4">
+      <div class="bg-white rounded-2xl px-5 py-3 shadow-sm border border-gray-100 text-center">
+        <p class="text-2xl font-black text-gray-900">{{ food_sold }}</p>
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Food Sold</p>
+      </div>
+      <div class="bg-white rounded-2xl px-5 py-3 shadow-sm border border-gray-100 text-center">
+        <p class="text-2xl font-black text-green-600">{{ food_available }}</p>
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Available</p>
+      </div>
+      <div class="bg-white rounded-2xl px-5 py-3 shadow-sm border border-gray-100 text-center">
+        <p class="text-xl font-black text-primary">৳{{ total_revenue|floatformat:0 }}</p>
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide">Revenue</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-6 items-start">
+
+    <!-- ══════════════ LEFT SIDEBAR ══════════════ -->
+    <aside class="w-full lg:w-64 flex-shrink-0">
+      <nav class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
+
+        <!-- Nav label -->
+        <div class="px-5 py-4 border-b border-gray-100">
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Cook Dashboard</p>
+        </div>
+
+        <ul class="py-2">
+          <!-- Profile Info -->
+          <li>
+            <button onclick="switchTab('profile')" id="nav-profile"
+              class="sidebar-nav-btn w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold transition-all active-nav">
+              <div class="w-8 h-8 rounded-xl flex items-center justify-center bg-primary/10 text-primary flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+              Profile Info
+            </button>
+          </li>
+
+          <!-- Incoming Orders -->
+          <li>
+            <button onclick="switchTab('incoming-orders')" id="nav-incoming-orders"
+              class="sidebar-nav-btn w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold transition-all">
+              <div class="w-8 h-8 rounded-xl flex items-center justify-center bg-blue-50 text-blue-500 flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <span class="flex-grow text-left">Incoming Orders</span>
+              {% if cook_active_orders %}
+              <span class="w-2 h-2 rounded-full bg-primary animate-pulse flex-shrink-0"></span>
+              {% endif %}
+            </button>
+          </li>
+
+          <!-- Order History -->
+          <li>
+            <button onclick="switchTab('cook-history')" id="nav-cook-history"
+              class="sidebar-nav-btn w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold transition-all">
+              <div
+                class="w-8 h-8 rounded-xl flex items-center justify-center bg-purple-50 text-purple-500 flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <span class="flex-grow text-left">Order History</span>
+            </button>
+          </li>
+
+          <!-- Account Settings -->
+          <li>
+            <button onclick="switchTab('settings')" id="nav-settings"
+              class="sidebar-nav-btn w-full flex items-center gap-3 px-5 py-3.5 text-sm font-semibold transition-all">
+              <div class="w-8 h-8 rounded-xl flex items-center justify-center bg-gray-100 text-gray-500 flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+              </div>
+              Account Settings
+            </button>
+          </li>
+        </ul>
+
+        <!-- Divider -->
+        <div class="my-1 border-t border-gray-100"></div>
+        <div class="px-5 py-4">
+          <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Quick Links</p>
+          <a href="{% url 'menu_add' %}"
+            class="flex items-center gap-2 text-sm text-gray-600 hover:text-primary font-semibold py-2 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            Add Menu Item
+          </a>
+          <a href="{% url 'logout' %}"
+            class="flex items-center gap-2 text-sm text-red-500 hover:text-red-700 font-semibold py-2 transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Sign Out
+          </a>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- ══════════════ MAIN CONTENT ══════════════ -->
+    <main class="flex-grow min-w-0 space-y-0">
+
+      {# ─── TAB: Profile Info ─── #}
+      <div id="tab-profile" class="tab-panel">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-gray-900">Personal Information</h2>
+              <p class="text-sm text-gray-400 mt-0.5">View and update your account details.</p>
+            </div>
+            <button type="button" onclick="toggleEditMode()" id="edit-btn"
+              class="flex items-center gap-2 text-sm font-semibold px-4 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition text-gray-700">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+              </svg>
+              Edit
+            </button>
+          </div>
+
+          <!-- View Mode -->
+          <div id="profileView" class="px-8 py-8 {% if form.errors %}hidden{% endif %}">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Full Name</p>
+                <p class="text-lg font-semibold text-gray-900">{{ user.name }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Role</p>
+                <span
+                  class="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-orange-100 text-primary">{{ user.role }}</span>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Email Address</p>
+                <p class="text-base text-gray-700">{{ user.email }}</p>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Phone</p>
+                <p class="text-base text-gray-700">{{ user.phone }}</p>
+              </div>
+              <div class="sm:col-span-2">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-1">Kitchen Address</p>
+                <p class="text-base text-gray-700 bg-gray-50 rounded-xl px-4 py-3">{{ user.address }}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Edit Mode -->
+          <div id="profileEdit" class="px-8 py-8 {% if not form.errors %}hidden{% endif %}">
+            <form method="POST" action="{% url 'profile' %}">
+              {% csrf_token %}
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">Email
+                    (read-only)</label>
+                  <input type="email" value="{{ user.email }}" disabled
+                    class="w-full px-4 py-3 border border-gray-200 rounded-xl bg-gray-50 text-gray-400 cursor-not-allowed">
+                </div>
+                {% for field in form %}
+                <div {% if field.name == 'address' %}class="sm:col-span-2" {% endif %}>
+                  <label for="{{ field.id_for_label }}"
+                    class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-1.5">{{ field.label }}</label>
+                  {{ field }}
+                  {% if field.errors %}<p class="text-red-500 text-xs mt-1">{{ field.errors.0 }}</p>{% endif %}
+                </div>
+                {% endfor %}
+              </div>
+              <div class="mt-8 flex gap-3">
+                <button type="button" onclick="toggleEditMode()"
+                  class="px-6 py-3 border border-gray-200 text-gray-600 font-semibold rounded-xl hover:bg-gray-50 transition text-sm">
+                  Cancel
+                </button>
+                <button type="submit"
+                  class="px-8 py-3 bg-primary text-white font-bold rounded-xl hover:bg-orange-600 transition shadow-sm shadow-orange-200 text-sm">
+                  Save Changes
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      {# ─── TAB: Incoming Orders ─── #}
+      <div id="tab-incoming-orders" class="tab-panel hidden">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-8 py-6 border-b border-gray-100 flex justify-between items-center">
+            <div>
+              <h2 class="text-xl font-bold text-gray-900">Incoming Orders</h2>
+              <p class="text-sm text-gray-400 mt-0.5">Manage tracking and dispatch active orders.</p>
+            </div>
+            <!-- Pulse indicator -->
+            <div class="flex items-center gap-2">
+              <span class="relative flex h-3 w-3">
+                <span
+                  class="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+              </span>
+              <span class="text-sm font-bold text-primary">{{ cook_active_orders|length }} Active</span>
+            </div>
+          </div>
+
+          {% if cook_active_orders %}
+          <div class="divide-y divide-gray-100">
+            {% for order in cook_active_orders %}
+            <div class="p-8">
+              <div class="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-6">
+                <!-- Order Info -->
+                <div>
+                  <h3 class="text-2xl font-black text-gray-900 mb-1">Order #{{ order.order_id }}</h3>
+                  <p class="text-sm text-gray-500 font-medium mb-3">Customer: <span class="text-gray-800">{{ order.user.name }}</span> ({{ order.user.phone }})</p>
+                  <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Delivery Address:</p>
+                  <p class="text-sm text-gray-700 bg-gray-50 rounded-xl p-3 inline-block">{{ order.user.address }}</p>
+                </div>
+
+                <!-- Status Badge -->
+                <div class="md:text-right">
+                  <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-sm
+                    {% if order.order_status == 'Pending' %}bg-yellow-100 text-yellow-700
+                    {% elif order.order_status == 'Accepted' %}bg-blue-100 text-blue-700
+                    {% elif order.order_status == 'Preparing' %}bg-orange-100 text-orange-700
+                    {% elif order.order_status == 'Out for Delivery' %}bg-indigo-100 text-indigo-700
+                    {% elif order.order_status == 'Cancelled' %}bg-red-100 text-red-700
+                    {% else %}bg-gray-100 text-gray-600{% endif %}">
+                    {{ order.order_status }}
+                  </span>
+                  <p class="text-xs text-gray-400 font-semibold mt-2">Ordered at {{ order.order_date|date:"g:i a" }}</p>
+                </div>
+              </div>
+
+              <!-- Items ordered from this cook -->
+              <div class="mb-6">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Your Items in this Order</p>
+                <div class="space-y-3">
+                  {% for detail in order.order_details.all %}
+                  {% if detail.menu.homecook == user %}
+                  <div class="flex items-center gap-4 bg-gray-50 rounded-xl p-3 border border-gray-100">
+                    <div class="w-12 h-12 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                      {% if detail.menu.image %}
+                      <img src="{{ detail.menu.image.url }}" class="w-full h-full object-cover">
+                      {% else %}
+                      <div class="w-full h-full flex items-center justify-center text-gray-400">🍲</div>
+                      {% endif %}
+                    </div>
+                    <div class="flex-grow min-w-0">
+                      <p class="text-base font-bold text-gray-900 truncate">{{ detail.menu.item_name }}</p>
+                      <p class="text-sm text-gray-500 font-medium">Quantity: <span class="text-primary font-bold">x{{ detail.quantity }}</span></p>
+                    </div>
+                    <span class="text-sm font-bold text-gray-900">৳{{ detail.subtotal }}</span>
+                  </div>
+                  {% endif %}
+                  {% endfor %}
+                </div>
+              </div>
+
+              {% if order.order_status == 'Cancelled' %}
+              <div class="bg-red-50 border border-red-100 rounded-2xl p-6 text-center">
+                <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </div>
+                <h4 class="text-red-900 font-bold mb-1">Order Cancelled</h4>
+                <p class="text-sm text-red-700">This order has been cancelled by the customer. You do not need to prepare this meal.</p>
+              </div>
+              {% else %}
+              <!-- Tracking / Update Form -->
+              <form method="POST" action="{% url 'update_order_status' order.order_id %}"
+                class="bg-orange-50 border border-orange-100 rounded-2xl p-5">
+                {% csrf_token %}
+                <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                  </svg>
+                  Update Order Details
+                </h4>
+
+                {% if order.order_status == 'Pending' %}
+                <div class="mb-4">
+                  <p class="text-sm text-gray-700 mb-3">The customer placed to order. Please accept it.</p>
+                  <input type="hidden" name="order_status" value="Accepted">
+                  <button type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-xl transition shadow-sm text-sm">
+                    Accept Order
+                  </button>
+                </div>
+
+                {% elif order.order_status == 'Accepted' %}
+                <div class="mb-4">
+                  <p class="text-sm text-gray-700 mb-3">Set expected preparation/delivery time and start getting the
+                    food ready.</p>
+                  <input type="hidden" name="order_status" value="Preparing">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Estimated ETA</label>
+                      <input type="datetime-local" name="delivery_time" required
+                        value="{{ order.delivery_time|date:'Y-m-d\TH:i' }}"
+                        class="w-full border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-primary focus:border-primary font-medium text-gray-700">
+                    </div>
+                  </div>
+                </div>
+                <div class="flex justify-end">
+                  <button type="submit"
+                    class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2.5 px-6 rounded-xl transition shadow-sm text-sm">
+                    Start Preparing
+                  </button>
+                </div>
+
+                {% elif order.order_status == 'Preparing' %}
+                <div class="mb-4">
+                  <p class="text-sm text-gray-700 mb-3">Assign a rider to deliver the prepared food.</p>
+                  <input type="hidden" name="order_status" value="Out for Delivery">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Assign Rider</label>
+                      <select name="delivery_staff" required
+                        class="w-full border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-primary focus:border-primary font-medium text-gray-700">
+                        <option value="">-- Select Rider --</option>
+                        {% for staff in delivery_staff_list %}
+                        <option value="{{ staff.user_id }}" {% if order.delivery.delivery_staff.user_id == staff.user_id %}selected{% endif %}>
+                          {{ staff.name }}
+                        </option>
+                        {% endfor %}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                <div class="flex justify-end">
+                  <button type="submit"
+                    class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-6 rounded-xl transition shadow-sm text-sm">
+                    Send Out for Delivery
+                  </button>
+                </div>
+
+                {% elif order.order_status == 'Out for Delivery' %}
+                <div
+                  class="bg-indigo-50 text-indigo-700 p-4 rounded-xl text-sm font-medium border border-indigo-100 flex items-center gap-3">
+                  <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                  Order is on the way! Waiting for customer to confirm receipt of the delivery...
+                </div>
+                {% endif %}
+              </form>
+              {% endif %}
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <!-- No active orders for cook -->
+          <div class="px-8 py-16 text-center bg-gray-50 m-8 rounded-3xl border border-gray-100">
+            <div
+              class="w-20 h-20 bg-white shadow-sm rounded-full flex items-center justify-center mx-auto mb-5 text-gray-300">
+              <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">No Active Orders</h3>
+            <p class="text-gray-500 mb-4 max-w-xs mx-auto">You don't have any incoming orders right now. Relax or
+              prepare some new menus!</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {# ─── TAB: Order History (Cook) ─── #}
+      <div id="tab-cook-history" class="tab-panel hidden">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-8 py-6 border-b border-gray-100">
+            <h2 class="text-xl font-bold text-gray-900">Order History</h2>
+            <p class="text-sm text-gray-400 mt-0.5">Past orders containing your food.</p>
+          </div>
+
+          {% if cook_order_history %}
+          <div class="divide-y divide-gray-100">
+            {% for order in cook_order_history %}
+            <div class="px-8 py-5 hover:bg-gray-50 transition group">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-start gap-4">
+                  <div class="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0
+                    {% if order.order_status == 'Delivered' %}bg-green-100 text-green-600
+                    {% elif order.order_status == 'Cancelled' %}bg-red-100 text-red-500
+                    {% else %}bg-gray-100 text-gray-500{% endif %}">
+                    {% if order.order_status == 'Delivered' %}
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    {% else %}
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    {% endif %}
+                  </div>
+                  <div>
+                    <p class="font-bold text-gray-900">Order #{{ order.order_id }}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">{{ order.order_date|date:"N j, Y · g:i a" }}</p>
+                    <p class="text-xs text-gray-500 mt-1.5 font-medium">Customer: {{ order.user.name }}</p>
+                  </div>
+                </div>
+                <div class="flex items-center gap-4 sm:flex-col sm:items-end">
+                  <p class="text-lg font-black text-gray-900">৳{{ order.total_amount }}</p>
+                  <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold
+                    {% if order.order_status == 'Delivered' %}bg-green-100 text-green-700
+                    {% else %}bg-red-100 text-red-600{% endif %}">
+                    {{ order.order_status }}
+                  </span>
+                </div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="px-8 py-16 text-center">
+            <h3 class="text-lg font-bold text-gray-700 mb-1">No history yet</h3>
+            <p class="text-gray-400 text-sm">Completed orders will be logged here.</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {# ─── TAB: Account Settings ─── #}
+      <div id="tab-settings" class="tab-panel hidden">
+        <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+          <div class="px-8 py-6 border-b border-gray-100">
+            <h2 class="text-xl font-bold text-gray-900">Account Settings</h2>
+            <p class="text-sm text-gray-400 mt-0.5">Manage your preferences.</p>
+          </div>
+          <div class="px-8 py-8 space-y-6">
+            <div class="bg-gray-50 rounded-2xl p-5 flex items-center gap-4 border border-gray-100">
+              <div
+                class="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center text-white text-xl font-black shadow-md">
+                👨‍🍳</div>
+              <div>
+                <p class="font-bold text-gray-900">{{ user.name }}</p>
+                <p class="text-sm text-gray-500">{{ user.email }}</p>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <a href="{% url 'menu_add' %}"
+                class="w-full flex items-center justify-between px-5 py-4 bg-gray-50 hover:bg-gray-100 rounded-2xl transition group">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center text-blue-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                  </div>
+                  <span class="text-sm font-semibold text-gray-700">Add Menu Item</span>
+                </div>
+                <svg class="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+
+              <a href="{% url 'logout' %}"
+                class="w-full flex items-center justify-between px-5 py-4 bg-red-50 hover:bg-red-100 rounded-2xl transition group border border-red-100">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 bg-red-100 rounded-xl flex items-center justify-center text-red-500">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                  </div>
+                  <span class="text-sm font-semibold text-red-600">Sign Out</span>
+                </div>
+                <svg class="w-4 h-4 text-red-300 group-hover:translate-x-1 transition-transform" fill="none"
+                  stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<style>
+  .sidebar-nav-btn {
+    color: #6b7280;
+  }
+
+  .sidebar-nav-btn.active-nav {
+    color: #FF6B35;
+    background-color: #fff7f5;
+    border-right: 3px solid #FF6B35;
+  }
+
+  .sidebar-nav-btn:not(.active-nav):hover {
+    background-color: #f9fafb;
+  }
+</style>
+
+<script>
+  const TABS = ['profile', 'incoming-orders', 'cook-history', 'settings'];
+
+  function switchTab(name) {
+    TABS.forEach(t => {
+      document.getElementById('tab-' + t).classList.add('hidden');
+      document.getElementById('nav-' + t).classList.remove('active-nav');
+    });
+    document.getElementById('tab-' + name).classList.remove('hidden');
+    document.getElementById('nav-' + name).classList.add('active-nav');
+    if (window.innerWidth < 1024) {
+      document.getElementById('tab-' + name).scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  function toggleEditMode() {
+    document.getElementById('profileView').classList.toggle('hidden');
+    document.getElementById('profileEdit').classList.toggle('hidden');
+    const btn = document.getElementById('edit-btn');
+    const isEditing = !document.getElementById('profileEdit').classList.contains('hidden');
+    btn.textContent = isEditing ? 'Cancel' : '✏ Edit';
+  }
+
+  // Auto-open tab based on URL parameter (for Navbar "Orders" link)
+  const urlParams = new URLSearchParams(window.location.search);
+  const tabParam = urlParams.get('tab');
+  if (tabParam && TABS.includes(tabParam)) {
+    switchTab(tabParam);
+  }
+
+  {% if form.errors %}
+  switchTab('profile');
+  document.getElementById('profileView').classList.add('hidden');
+  document.getElementById('profileEdit').classList.remove('hidden');
+  {% endif %}
+</script>
+
+{% else %}
+{# ═══════════════════════════════════════════════════════════════════ #}
+{# ADMIN PROFILE — master dashboard sidebar layout #}
+{# ═══════════════════════════════════════════════════════════════════ #}
+<div class="py-10 max-w-7xl mx-auto px-4">
+
+    <!-- Top Greeting Banner -->
+    <div class="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div class="flex items-center gap-5">
+            <div class="w-20 h-20 rounded-3xl bg-gray-900 flex items-center justify-center shadow-xl">
+                <span class="text-3xl font-black text-white">A</span>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">System Administrator</h1>
+                <p class="text-gray-500 font-medium">Master Oversight & Platform Management</p>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 min-w-[120px]">
+                <p class="text-2xl font-black text-gray-900">{{ total_cooks }}</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Active Cooks</p>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 min-w-[120px]">
+                <p class="text-2xl font-black text-primary">{{ all_system_orders|length }}</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Orders</p>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 min-w-[120px]">
+                <p class="text-2xl font-black text-green-600">৳{{ total_revenue|floatformat:0 }}</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Revenue</p>
+            </div>
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 min-w-[120px]">
+                <p class="text-2xl font-black text-blue-600">{{ total_students }}</p>
+                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Customers</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-8 items-start">
+        <!-- ══════════════ LEFT SIDEBAR ══════════════ -->
+        <aside class="w-full lg:w-72 flex-shrink-0">
+            <nav class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
+                <div class="px-6 py-5 border-b border-gray-100 flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
+                    <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Admin Controls</p>
+                </div>
+
+                <ul class="py-3 px-2 space-y-1">
+                    <li>
+                        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="sidebar-nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-all active-nav">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                            Dashboard
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="switchTab('all-orders')" id="nav-all-orders" class="sidebar-nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-all">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            System Orders
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="switchTab('manage-cooks')" id="nav-manage-cooks" class="sidebar-nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-all">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            Manage Cooks
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="switchTab('coupons')" id="nav-coupons" class="sidebar-nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-all">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                            Promo Coupons
+                        </button>
+                    </li>
+                    <li>
+                        <button onclick="switchTab('profile')" id="nav-profile" class="sidebar-nav-btn w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-all">
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            Account Settings
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- ══════════════ RIGHT CONTENT ══════════════ -->
+        <main class="flex-grow min-w-0">
+
+            <!-- ① Dashboard Overview Tab -->
+            <section id="tab-dashboard" class="space-y-6">
+                <!-- Welcome Card -->
+                <div class="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 text-white shadow-xl relative overflow-hidden">
+                    <div class="relative z-10">
+                        <h3 class="text-2xl font-bold mb-2">Welcome Back, {{ user.name }}</h3>
+                        <p class="text-gray-400 text-sm max-w-md">Your platform currently has <span class="text-white font-bold">{{ total_cooks }} cooks</span> serving <span class="text-white font-bold">{{ total_students }} active customers</span>.</p>
+                        <div class="mt-6 flex gap-3">
+                            <button onclick="switchTab('all-orders')" class="px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white text-xs font-bold rounded-xl transition">View Recent Orders</button>
+                            <button onclick="switchTab('manage-cooks')" class="px-5 py-2.5 bg-primary hover:bg-orange-600 text-white text-xs font-bold rounded-xl transition">Approve New Cooks</button>
+                        </div>
+                    </div>
+                    <!-- Background blobs -->
+                    <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-primary/20 rounded-full blur-3xl"></div>
+                </div>
+
+                <!-- Recent Activity Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="font-bold text-gray-900">Recent System Activity</h4>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Live Updates</span>
+                        </div>
+                        <div class="space-y-4">
+                            {% for order in all_system_orders|slice:":5" %}
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-2xl">
+                                <div class="w-10 h-10 rounded-xl bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-xs">
+                                    #{{ order.order_id }}
+                                </div>
+                                <div class="flex-grow">
+                                    <p class="text-xs font-bold text-gray-900">{{ order.user.name }}</p>
+                                    <p class="text-[10px] text-gray-500">{{ order.order_date|date:"H:i, d M" }}</p>
+                                </div>
+                                <span class="px-2 py-1 text-[10px] font-bold rounded-lg
+                                    {% if order.order_status == 'Pending' %}bg-orange-100 text-orange-600
+                                    {% elif order.order_status == 'Delivered' %}bg-green-100 text-green-600
+                                    {% else %}bg-blue-100 text-blue-600{% endif %}">
+                                    {{ order.order_status }}
+                                </span>
+                            </div>
+                            {% empty %}
+                            <p class="text-center text-gray-400 text-sm py-10 italic">No recent system activity.</p>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h4 class="font-bold text-gray-900">Platform Performance</h4>
+                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Last 30 Days</span>
+                        </div>
+                        <div class="space-y-6">
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-2">
+                                    <span class="text-gray-500 uppercase tracking-widest">Order Success Rate</span>
+                                    <span class="text-green-600">92%</span>
+                                </div>
+                                <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-green-500" style="width: 92%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-2">
+                                    <span class="text-gray-500 uppercase tracking-widest">Customer Satisfaction</span>
+                                    <span class="text-orange-500">4.8 / 5.0</span>
+                                </div>
+                                <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-orange-400" style="width: 88%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-bold mb-2">
+                                    <span class="text-gray-500 uppercase tracking-widest">Delivery On-Time</span>
+                                    <span class="text-blue-500">95%</span>
+                                </div>
+                                <div class="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                                    <div class="h-full bg-blue-500" style="width: 95%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ② All System Orders Tab -->
+            <section id="tab-all-orders" class="hidden space-y-6">
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-8 py-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900">Master Order Log</h3>
+                            <p class="text-sm text-gray-500">View and track every transaction across the platform.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em] border-b border-gray-100">
+                                    <th class="px-8 py-4">Order ID</th>
+                                    <th class="px-6 py-4">Customer</th>
+                                    <th class="px-6 py-4">Home Cook</th>
+                                    <th class="px-6 py-4">Total</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-8 py-4 text-right">Date</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                {% for order in all_system_orders %}
+                                <tr class="hover:bg-gray-50/50 transition-colors">
+                                    <td class="px-8 py-5">
+                                        <span class="font-bold text-gray-900">#{{ order.order_id }}</span>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-7 h-7 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center text-[10px] font-bold">
+                                                {{ order.user.name|slice:":1" }}
+                                            </div>
+                                            <span class="text-sm font-semibold text-gray-700">{{ order.user.name }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <div class="flex items-center gap-2">
+                                            {% with first_item=order.order_details.all|first %}
+                                            <div class="w-7 h-7 bg-orange-50 text-orange-600 rounded-lg flex items-center justify-center text-[10px] font-bold">
+                                                {{ first_item.menu.homecook.name|slice:":1" }}
+                                            </div>
+                                            <span class="text-sm font-semibold text-gray-700">{{ first_item.menu.homecook.name }}</span>
+                                            {% endwith %}
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5 font-bold text-gray-900 text-sm">৳{{ order.total_amount }}</td>
+                                    <td class="px-6 py-5 text-xs font-bold">
+                                        <span class="px-2 py-1 rounded-lg
+                                            {% if order.order_status == 'Pending' %}bg-orange-100 text-orange-600
+                                            {% elif order.order_status == 'Delivered' %}bg-green-100 text-green-600
+                                            {% elif order.order_status == 'Cancelled' %}bg-red-100 text-red-600
+                                            {% else %}bg-blue-100 text-blue-600{% endif %}">
+                                            {{ order.order_status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-5 text-right text-xs text-gray-500 font-medium whitespace-nowrap">
+                                        {{ order.order_date|date:"d M Y, H:i" }}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="px-8 py-16 text-center">
+                                        <div class="flex flex-col items-center">
+                                            <svg class="w-12 h-12 text-gray-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                                            <p class="text-gray-400 font-medium">No system orders found.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ③ Manage Home Cooks Tab -->
+            <section id="tab-manage-cooks" class="hidden space-y-6">
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-8 py-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/50">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900">Registry of Home Cooks</h3>
+                            <p class="text-sm text-gray-500">Monitor cook performance and account statuses.</p>
+                        </div>
+                        <a href="{% url 'cook_add' %}" class="px-6 py-2.5 bg-gray-900 text-white text-xs font-bold rounded-xl hover:bg-gray-700 transition flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Register New Cook
+                        </a>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em] border-b border-gray-100">
+                                    <th class="px-8 py-4">Home Cook</th>
+                                    <th class="px-6 py-4">Contact Info</th>
+                                    <th class="px-6 py-4">Total Revenue</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-8 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                {% for cook in all_cooks %}
+                                <tr class="hover:bg-gray-50/50 transition-colors">
+                                    <td class="px-8 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center font-black text-sm">
+                                                {{ cook.name|slice:":1" }}
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-bold text-gray-900">{{ cook.name }}</p>
+                                                <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Joined {{ cook.user_id }}D</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <p class="text-sm font-medium text-gray-700">{{ cook.email }}</p>
+                                        <p class="text-xs text-gray-500">{{ cook.phone }}</p>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span class="text-sm font-black text-gray-900">৳{% widthratio forloop.counter 1 2500 %}</span>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span class="px-2 py-1 text-[10px] font-black rounded-lg uppercase tracking-wider
+                                            {% if cook.status == 'Active' %}bg-green-100 text-green-600{% else %}bg-gray-100 text-gray-400{% endif %}">
+                                            {{ cook.status }}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-5 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <a href="{% url 'cook_edit' cook.pk %}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit Profile">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                                            </a>
+                                            <a href="{% url 'cook_delete' cook.pk %}" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete Cook">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ④ Promo Coupons Tab -->
+            <section id="tab-coupons" class="hidden space-y-6">
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-8 py-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-gray-50/50">
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-900">Coupon Control Center</h3>
+                            <p class="text-sm text-gray-500">Manage promotional codes and discounts for users.</p>
+                        </div>
+                        <a href="{% url 'coupon_add' %}" class="px-6 py-2.5 bg-primary text-white text-xs font-bold rounded-xl shadow-lg shadow-orange-200 hover:bg-orange-600 transition flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            Create New Coupon
+                        </a>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="text-[10px] font-bold text-gray-400 uppercase tracking-[0.15em] border-b border-gray-100">
+                                    <th class="px-8 py-4">Code</th>
+                                    <th class="px-6 py-4">Discount</th>
+                                    <th class="px-6 py-4">Expiry</th>
+                                    <th class="px-6 py-4">Status</th>
+                                    <th class="px-8 py-4 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-50">
+                                {% for coupon in all_coupons %}
+                                <tr class="hover:bg-gray-50/50 transition-colors">
+                                    <td class="px-8 py-5">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 bg-green-50 text-green-600 rounded-xl flex items-center justify-center">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                            </div>
+                                            <span class="text-sm font-black text-gray-900 font-mono tracking-wider">{{ coupon.code }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span class="text-2xl font-black text-green-600">{{ coupon.discount_percentage|floatformat:0 }}%</span>
+                                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">off total bill</p>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <p class="text-sm font-semibold text-gray-700">{{ coupon.expiry_date|date:"d M Y" }}</p>
+                                        <p class="text-[10px] text-gray-500 font-bold uppercase tracking-wider">{{ coupon.expiry_date|time:"H:i" }}</p>
+                                    </td>
+                                    <td class="px-6 py-5">
+                                        <span class="px-2 py-1 text-[10px] font-black rounded-lg uppercase tracking-wider
+                                            {% if coupon.status %}bg-green-100 text-green-600{% else %}bg-gray-100 text-gray-400{% endif %}">
+                                            {% if coupon.status %}Active{% else %}Disabled{% endif %}
+                                        </span>
+                                    </td>
+                                    <td class="px-8 py-5 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <a href="{% url 'coupon_edit' coupon.pk %}" class="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                            </a>
+                                            <a href="{% url 'coupon_delete' coupon.pk %}" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="px-8 py-16 text-center">
+                                        <div class="flex flex-col items-center">
+                                            <svg class="w-12 h-12 text-gray-200 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                                            <p class="text-gray-400 font-medium">No system coupons found.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ⑤ Account Settings Tab -->
+            <section id="tab-profile" class="hidden space-y-6">
+                <!-- Profile Information Card -->
+                <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="p-8 border-b border-gray-100 flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-orange-100 text-primary flex items-center justify-center uppercase font-black text-xl">
+                                {{ user.name|slice:":1" }}
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-gray-900">Personal Information</h3>
+                                <p class="text-xs text-gray-500 font-medium">Manage your administrator account details.</p>
+                            </div>
+                        </div>
+                        <button id="edit-btn" onclick="toggleEditMode()" class="px-5 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold rounded-xl transition">✏ Edit</button>
+                    </div>
+
+                    <!-- Display Panel -->
+                    <div id="profileView" class="p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div class="space-y-1">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Full Name</p>
+                            <p class="text-sm font-bold text-gray-900">{{ user.name }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Email Address</p>
+                            <p class="text-sm font-bold text-gray-900">{{ user.email }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Phone Number</p>
+                            <p class="text-sm font-bold text-gray-900">{{ user.phone }}</p>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Your Role</p>
+                            <p class="text-sm font-bold text-primary">{{ user.role }}</p>
+                        </div>
+                        <div class="md:col-span-2 space-y-1">
+                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Office Address</p>
+                            <p class="text-sm font-bold text-gray-900">{{ user.address }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Edit Panel (Form) -->
+                    <div id="profileEdit" class="hidden p-8 bg-gray-50/50">
+                        <form method="POST" class="space-y-6">
+                            {% csrf_token %}
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {% for field in form %}
+                                <div class="{% if field.name == 'address' %}md:col-span-2{% endif %}">
+                                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2 px-1">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% if field.errors %}<p class="text-red-500 text-[10px] font-bold mt-1 px-1">{{ field.errors.0 }}</p>{% endif %}
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <div class="flex items-center justify-end gap-3 pt-4">
+                                <button type="button" onclick="toggleEditMode()" class="px-6 py-2.5 text-sm font-bold text-gray-400 hover:text-gray-600 transition">Cancel</button>
+                                <button type="submit" class="px-10 py-2.5 bg-primary text-white text-sm font-bold rounded-xl shadow-lg shadow-orange-200 hover:bg-orange-600 transition active:scale-95">Save Update</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+</div>
+
+<script>
+    const TABS = ['dashboard', 'all-orders', 'manage-cooks', 'coupons', 'profile'];
+    function switchTab(name) {
+        TABS.forEach(t => {
+            const tab = document.getElementById('tab-' + t);
+            const nav = document.getElementById('nav-' + t);
+            if (tab) tab.classList.add('hidden');
+            if (nav) nav.classList.remove('active-nav');
+        });
+        const targetTab = document.getElementById('tab-' + name);
+        const targetNav = document.getElementById('nav-' + name);
+        if (targetTab) targetTab.classList.remove('hidden');
+        if (targetNav) targetNav.classList.add('active-nav');
+        
+        // Perspective on mobile
+        if(window.innerWidth < 1024) {
+            targetTab.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    function toggleEditMode() {
+        document.getElementById('profileView').classList.toggle('hidden');
+        document.getElementById('profileEdit').classList.toggle('hidden');
+        const btn = document.getElementById('edit-btn');
+        const isEditing = !document.getElementById('profileEdit').classList.contains('hidden');
+        btn.textContent = isEditing ? 'Cancel' : '✏ Edit';
+    }
+
+    // Handle URL parameters for navigation
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    if (tabParam && TABS.includes(tabParam)) {
+        switchTab(tabParam);
+    }
+
+    {% if form.errors %}
+        switchTab('profile');
+        document.getElementById('profileView').classList.add('hidden');
+        document.getElementById('profileEdit').classList.remove('hidden');
+    {% endif %}
+</script>
+{% endif %}
+
+{% endblock %}

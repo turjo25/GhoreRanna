@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% block title %}Menu - Ghoreranna{% endblock %}
+{% block content %}
+<div class="py-12">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-10 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div>
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">Our Menu</h1>
+            <p class="text-gray-500 mt-2 text-lg">Delicious homemade meals carved by passionate cooks.</p>
+        </div>
+        {% if request.session.user_role == 'Admin' or request.session.user_role == 'Home Cook' %}
+        <div class="mt-4 md:mt-0">
+            <a href="{% url 'menu_add' %}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-xl text-white bg-primary hover:bg-orange-600 transition duration-300 shadow-lg hover:shadow-orange-500/50 transform hover:-translate-y-0.5">
+                <svg class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Menu Item
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Search and Filter Section -->
+    <div class="mb-10 space-y-6">
+        <div class="bg-white p-2 rounded-2xl shadow-sm border border-gray-100 flex flex-col lg:flex-row gap-4 items-center justify-between">
+            <!-- Search Form -->
+            <form method="GET" action="{% url 'menu_list' %}" class="w-full lg:flex-1 flex gap-2">
+                <div class="relative flex-grow group">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400 group-focus-within:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input type="text" name="q" value="{{ query }}" placeholder="Search for food, ingredients..." 
+                        class="block w-full pl-11 pr-4 py-3 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-primary transition-all duration-300 text-gray-900 placeholder-gray-400 font-medium">
+                    {% if query %}
+                    <a href="{% url 'menu_list' %}" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-red-500 transition-colors">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </a>
+                    {% endif %}
+                </div>
+                <button type="submit" class="bg-primary hover:bg-orange-600 text-white font-bold py-3 px-6 rounded-xl transition duration-300 shadow-lg shadow-orange-500/20 flex-shrink-0">
+                    Search
+                </button>
+            </form>
+
+            <!-- Category Filter Dropdown -->
+            <div class="relative w-full lg:w-auto">
+                <div class="dropdown inline-block relative w-full lg:w-auto">
+                    <button class="bg-gray-50 text-gray-700 font-bold py-3 px-6 rounded-xl inline-flex items-center justify-between w-full lg:w-auto border border-gray-100 hover:bg-gray-100 transition-colors group">
+                        <span class="mr-2">{% if selected_category %}{{ selected_category }}{% else %}Filter by Category{% endif %}</span>
+                        <svg class="fill-current h-4 w-4 text-gray-400 group-hover:text-primary transition-transform group-hover:rotate-180" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                            <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                        </svg>
+                    </button>
+                    <ul class="dropdown-menu absolute hidden text-gray-700 pt-1 w-full lg:w-56 right-0 z-50">
+                        <li class="bg-white border-t border-x first:rounded-t-xl overflow-hidden hover:bg-orange-50 transition-colors">
+                            <a class="block py-3 px-4 text-sm font-bold {% if not selected_category %}text-primary{% else %}text-gray-600{% endif %}" 
+                                href="{% url 'menu_list' %}{% if query %}?q={{ query }}{% endif %}">All Items</a>
+                        </li>
+                        {% for cat in categories %}
+                        <li class="bg-white border-x last:border-b last:rounded-b-xl overflow-hidden hover:bg-orange-50 transition-colors">
+                            <a class="block py-3 px-4 text-sm font-bold {% if selected_category == cat %}text-primary{% else %}text-gray-600{% endif %}" 
+                                href="{% url 'menu_list' %}?category={{ cat }}{% if query %}&q={{ query }}{% endif %}">{{ cat }}</a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <style>
+            .dropdown:hover .dropdown-menu {
+                display: block;
+            }
+            .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+        </style>
+
+        <!-- Active Filter Indicator -->
+        {% if query or selected_category %}
+        <div class="flex items-center gap-2 px-2">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Showing:</span>
+            {% if query %}
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-orange-50 text-primary text-xs font-bold rounded-lg border border-orange-100">
+                "{{ query }}"
+            </span>
+            {% endif %}
+            {% if selected_category %}
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-lg border border-blue-100 uppercase tracking-tighter">
+                {{ selected_category }}
+            </span>
+            {% endif %}
+            <a href="{% url 'menu_list' %}" class="text-xs font-bold text-red-400 hover:text-red-500 transition-colors ml-2 underline underline-offset-4 decoration-2">Clear all filters</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Menu Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for menu in menus %}
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group flex flex-col h-full">
+            
+            <!-- Image Area -->
+            <div class="relative h-56 overflow-hidden">
+                {% if menu.image %}
+                <img src="{{ menu.image.url }}" alt="{{ menu.item_name }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                {% else %}
+                <div class="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-gray-400">
+                    <svg class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                {% endif %}
+                
+                <!-- Status Badge -->
+                {% if not menu.availability_status %}
+                <div class="absolute top-4 right-4">
+                    <span class="bg-red-500/90 backdrop-blur text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg">
+                        Unavailable
+                    </span>
+                </div>
+                {% endif %}
+                
+                <!-- Meal Type Badge -->
+                <div class="absolute bottom-4 left-4">
+                    <span class="bg-white/90 backdrop-blur text-gray-800 text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded-lg shadow-sm">
+                        {{ menu.meal_type }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="p-6 flex flex-col flex-grow">
+                <div class="flex justify-between items-start mb-2">
+                    <h2 class="text-2xl font-bold text-gray-900 leading-tight group-hover:text-primary transition-colors">{{ menu.item_name }}</h2>
+                    <span class="bg-amber-100 text-amber-800 text-lg font-black px-3 py-1 rounded-xl shadow-sm whitespace-nowrap ml-3">
+                        ৳{{ menu.price }}
+                    </span>
+                </div>
+                
+                <div class="flex items-center text-sm text-gray-500 mb-4">
+                    <svg class="h-4 w-4 mr-1 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    By <span class="font-medium text-gray-700 ml-1">{{ menu.homecook.name }}</span>
+                </div>
+                
+                <p class="text-gray-600 mb-6 line-clamp-2 flex-grow">{{ menu.description }}</p>
+
+                <!-- Admin & Home Cook Actions -->
+                {% if request.session.user_role == 'Admin' or request.session.user_role == 'Home Cook' %}
+                <div class="mt-auto flex space-x-3 pt-4 border-t border-gray-100">
+                    <a href="{% url 'menu_update' menu.pk %}" class="flex-1 inline-flex justify-center items-center text-center bg-blue-50 text-blue-700 py-2.5 rounded-xl hover:bg-blue-600 hover:text-white transition duration-300 font-semibold text-sm">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                        </svg>
+                        Edit
+                    </a>
+                    <a href="{% url 'menu_delete' menu.pk %}" class="flex-1 inline-flex justify-center items-center text-center bg-red-50 text-red-700 py-2.5 rounded-xl hover:bg-red-600 hover:text-white transition duration-300 font-semibold text-sm">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        Delete
+                    </a>
+                </div>
+                {% else %}
+                <!-- Customer Actions (Students, Bachelors, etc. + Guests) -->
+                <div class="mt-auto flex space-x-3 pt-4 border-t border-gray-100">
+                    <a href="{% url 'menu_detail' menu.pk %}" class="flex-1 inline-flex justify-center items-center text-center bg-gray-50 text-gray-700 py-2.5 rounded-xl hover:bg-gray-200 transition duration-300 font-semibold text-sm">
+                        <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Details
+                    </a>
+                    
+                    {% if menu.availability_status %}
+                        {% if request.session.user_id %}
+                        <a href="{% url 'cart_add' menu.pk %}" class="flex-1 inline-flex justify-center items-center text-center bg-primary text-white py-2.5 rounded-xl hover:bg-orange-600 transition duration-300 shadow-md hover:shadow-orange-500/50 font-semibold text-sm">
+                            <svg class="w-4 h-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            Order Now
+                        </a>
+                        {% endif %}
+                    {% else %}
+                    <button disabled class="flex-1 inline-flex justify-center items-center text-center bg-gray-200 text-gray-400 py-2.5 rounded-xl font-semibold text-sm cursor-not-allowed">
+                        Unavailable
+                    </button>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        {% empty %}
+        <!-- Empty State -->
+        <div class="col-span-full py-20 bg-white rounded-3xl shadow-sm border border-gray-100 text-center flex flex-col items-center justify-center">
+            <div class="w-24 h-24 bg-orange-50 rounded-full flex items-center justify-center mb-6 text-2xl">
+                {% if query or selected_category %}🔍{% else %}🍲{% endif %}
+            </div>
+            
+            {% if query or selected_category %}
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">No results found</h3>
+            <p class="text-gray-500 max-w-sm mx-auto mb-8">We couldn't find any items matching your current filters. Try searching for something else or clear the filters.</p>
+            <a href="{% url 'menu_list' %}" class="inline-flex items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-xl text-white bg-primary hover:bg-orange-600 transition duration-300 shadow-lg hover:shadow-orange-500/50">
+                Clear all filters
+            </a>
+            {% else %}
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">No menu items yet</h3>
+            <p class="text-gray-500 max-w-sm mx-auto mb-8">It looks like the kitchen is quiet right now. Check back later for delicious homemade meals.</p>
+            
+            {% if request.session.user_role == 'Admin' or request.session.user_role == 'Home Cook' %}
+            <a href="{% url 'menu_add' %}" class="inline-flex items-center px-8 py-3.5 border border-transparent text-base font-medium rounded-xl text-white bg-primary hover:bg-orange-600 transition duration-300 shadow-lg hover:shadow-orange-500/50">
+                <svg class="mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Create First Item
+            </a>
+            {% endif %}
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
