@@ -4,222 +4,144 @@ A Django-based web application that connects students, bachelor employees, and o
 
 ## Overview
 
-GhorerRanna is an e-commerce platform designed to facilitate food ordering from verified home cooks. The system supports multiple user roles with different permissions, allowing for a complete order management workflow including menu browsing, cart management, checkout, payment processing, and delivery tracking.
+GhorerRanna is an e-commerce platform designed to facilitate food ordering from verified home cooks. The system supports multiple user roles with different permissions, allowing for a complete order management workflow including menu browsing, cart management, checkout, payment processing, delivery tracking, and role-specific dashboards.
 
 ## Features
 
-### User Roles
-- **Students & Bachelor Employees**: Browse menus, place orders, track deliveries
-- **Home Cooks**: Create and manage meal offerings, view orders, update order status
-- **Delivery Staff**: Manage order deliveries and delivery status
-- **Admin**: Oversee the platform, manage users and system operations
+### User Roles & Capabilities
+- **Students & Bachelor Employees (Customers)**: Browse menus, filter by category, add items to cart, apply discount coupons, secure checkout, track live order status, and cancel pending orders.
+- **Home Cooks**: Create and manage their meal offerings, manage their availability, view incoming orders in their dashboard, update order statuses (Accepted, Preparing, Out for Delivery), and assign delivery staff.
+- **Delivery Staff**: Dedicated delivery dashboard to manage assigned deliveries, track active and past deliveries, and update delivery statuses (Assigned, Picked Up, Handed Over).
+- **Admin**: Master platform dashboard. Can manage users, create and manage Home Cook accounts, manage system-wide coupons, and view all orders, revenues, and platform statistics.
 
 ### Core Functionality
-- **User Management**: Registration, authentication, user profile management
-- **Menu Management**: Home cooks can create, update, and manage their menu items
-- **Shopping Cart**: Add items to cart and manage quantities
-- **Checkout & Payment**: Secure checkout process with multiple payment methods:
-  - Cash on Delivery
-  - Card Payment
-  - Online Payment
-- **Order Management**: Track order status from pending to delivered
-- **Coupon System**: Apply discount coupons at checkout
-- **Order Tracking**: Real-time order status updates
-- **Delivery Management**: Assign and track deliveries
+- **User Authentication & Profiles**: Role-based registration and secure login. Dedicated profile pages with statistics (e.g., total orders, total revenue, food sold) tailored to each user's role.
+- **Menu Management**: CRUD operations for menu items with images, pricing, and availability toggles.
+- **Shopping Cart**: Session-based cart with quantity adjustments and dynamic total calculations.
+- **Checkout & Payment Workflow**: Secure checkout process supporting Cash, Card, and Online payment methods (demo processing). 
+- **Coupon System**: Dynamic discount application via AJAX with expiration and status validation.
+- **Order Management & Tracking**: Real-time tracking of order statuses (`Pending`, `Accepted`, `Preparing`, `Out for Delivery`, `Handed Over`, `Delivered`, `Cancelled`).
+- **Delivery System**: Dedicated tracking and assignment workflow for delivery personnel.
 
 ## Technical Stack
 
-- **Backend**: Django 6.0.3
-- **Database**: SQLite (default, can be configured for production databases)
-- **Frontend**: HTML, CSS, JavaScript
-- **Python Version**: 3.x
+- **Backend**: Django (Python 3.x)
+- **Database**: SQLite (default, production-ready for PostgreSQL/MySQL via config)
+- **Frontend**: HTML5, CSS3, JavaScript, Django Templates
+- **Styling**: Vanilla CSS with modern aesthetics
 
 ## Project Structure
 
-```
+```text
 GhorerRanna/
 ├── manage.py                 # Django management script
-├── db.sqlite3               # SQLite database
-├── Ghoreranna/              # Main project settings
-│   ├── __init__.py
-│   ├── asgi.py              # ASGI configuration
-│   ├── settings.py          # Django settings
-│   ├── urls.py              # URL configuration
-│   └── wsgi.py              # WSGI configuration
-├── ghoreranna_app/          # Main application
-│   ├── models.py            # Database models
-│   ├── views.py             # View controllers
-│   ├── forms.py             # Django forms
-│   ├── urls.py              # App-specific URL routing
-│   ├── admin.py             # Django admin configuration
-│   ├── context_processors.py # Template context processors
-│   ├── tests.py             # Unit tests
-│   ├── migrations/          # Database migrations
-│   └── __init__.py
-└── templates/               # HTML templates
-    ├── base.html            # Base template
-    ├── home.html            # Home page
-    ├── login.html           # Login page
-    ├── register.html        # Registration page
-    ├── profile.html         # User profile
-    ├── menu_list.html       # Browse menus
-    ├── menu_detail.html     # Menu item details
-    ├── menu_form.html       # Create/edit menu
-    ├── cart.html            # Shopping cart
-    ├── checkout.html        # Checkout page
-    ├── order_confirmation.html # Order confirmation
-    ├── cook_list.html       # List of home cooks
-    ├── cook_form.html       # Cook profile form
-    ├── cook_confirm_delete.html # Delete confirmation
-    ├── coupon_form.html     # Coupon management
-    └── coupon_confirm_delete.html # Delete confirmation
+├── db.sqlite3                # SQLite database
+├── Ghoreranna/               # Main project configuration
+│   ├── settings.py           # Django settings
+│   ├── urls.py               # Main URL routing
+│   ├── asgi.py               
+│   └── wsgi.py               
+├── ghoreranna_app/           # Main application module
+│   ├── models.py             # Database schemas (User, Menu, Order, etc.)
+│   ├── views.py              # Application logic and view controllers
+│   ├── forms.py              # Django forms for validation
+│   ├── urls.py               # App-level URL definitions
+│   ├── admin.py              # Django admin registrations
+│   ├── context_processors.py # Global template variables
+│   └── tests.py              # Application tests
+└── templates/                # Frontend HTML templates
+    ├── base.html             # Master layout
+    ├── home.html             # Landing page
+    ├── profile.html          # Role-based user dashboards
+    ├── delivery_dashboard.html # Delivery staff portal
+    ├── menu_list.html        # Menu catalog
+    ├── cart.html             # Shopping cart interface
+    ├── checkout.html         # Checkout and payment
+    └── ...                   # Forms and other views
 ```
+
+## Database Models
+
+- **User**: Custom user model with role-based access control (Student, Bachelor Employee, Home Cook, Delivery Staff, Admin).
+- **Menu**: Food items tied to a specific Home Cook, including pricing, images, and availability.
+- **Order**: Customer orders containing total amounts, payment methods, delivery times, and current statuses.
+- **OrderDetails**: Pivot table linking multiple Menu items to a single Order with quantities and subtotals.
+- **Coupon**: Discount codes with percentage reductions, statuses, and expiration dates.
+- **Payment**: Records of payment transactions linked to orders.
+- **Delivery**: Delivery tracking records linking orders to assigned Delivery Staff.
+- **Feedback**: Rating and review system for completed orders.
+- **Subscription**: Management model for recurring meal plans (future capability).
 
 ## Installation & Setup
 
 ### Prerequisites
 - Python 3.8 or higher
 - pip (Python package manager)
+- Git
 
 ### Steps
 
-1. **Clone/Navigate to the project directory**
+1. **Clone the repository**
    ```bash
+   git clone https://github.com/turjo25/GhoreRanna.git
    cd GhorerRanna
    ```
 
-2. **Create a virtual environment (optional but recommended)**
+2. **Set up a virtual environment (Recommended)**
    ```bash
    python -m venv venv
-   source venv/Scripts/activate  # On Windows
+   source venv/Scripts/activate  # Windows
    # or
-   source venv/bin/activate      # On macOS/Linux
+   source venv/bin/activate      # macOS/Linux
    ```
 
 3. **Install dependencies**
    ```bash
    pip install -r requirements.txt
    ```
-   
-   If `requirements.txt` doesn't exist, install Django:
-   ```bash
-   pip install django pillow
-   ```
 
-4. **Apply database migrations**
+4. **Environment Variables**
+   - Copy `.env.example` to `.env` and configure your local settings.
+
+5. **Apply database migrations**
    ```bash
    python manage.py migrate
    ```
 
-5. **Create a superuser (admin account)**
+6. **Create an Admin account**
    ```bash
    python manage.py createsuperuser
    ```
 
-6. **Run the development server**
+7. **Run the development server**
    ```bash
    python manage.py runserver
    ```
-   
-   The application will be available at `http://127.0.0.1:8000/`
+   Access the platform at `http://127.0.0.1:8000/`.
 
-## Database Models
+## Usage Guide
 
-### Core Models
-
-- **User**: Manages user accounts with role-based access control
-  - Roles: Student, Bachelor Employee, Home Cook, Delivery Staff, Admin
-
-- **Menu**: Represents food items offered by home cooks
-  - Links to User (Home Cook)
-  - Includes item name, description, price, availability
-
-- **Order**: Tracks customer orders
-  - Links to User (Customer) and Coupon (optional)
-  - Includes order date, delivery time, total amount, payment method, status
-
-- **OrderDetails**: Individual items in an order
-  - Links to Order and Menu
-  - Tracks quantity and subtotal
-
-- **Coupon**: Discount codes for orders
-  - Includes discount percentage and expiry date
-
-- **Payment**: Payment transaction records
-
-- **Delivery**: Delivery information for orders
-
-## Usage
-
-### For Customers
-1. Register or log in to your account
-2. Browse available menu items from home cooks
-3. Add items to your cart
-4. Proceed to checkout
-5. Select payment method and apply coupons (if available)
-6. Confirm order and track its status
+### For Customers (Students/Employees)
+1. Register and log in.
+2. Browse menus, filter by meal type, and add items to your cart.
+3. Apply any valid coupons during checkout.
+4. Track your order status in real-time from your Profile dashboard.
+5. Acknowledge delivery once your food arrives.
 
 ### For Home Cooks
-1. Register with "Home Cook" role
-2. Create and manage your menu items
-3. View incoming orders in your dashboard
-4. Update order status as you prepare and deliver meals
-5. Manage your availability
+1. Log in to your Home Cook account (created by Admins).
+2. Use the Profile dashboard to add and manage your Menu items.
+3. Monitor the "Incoming Orders" tab.
+4. Update statuses (e.g., Preparing, Out for Delivery) and assign Delivery Staff.
+
+### For Delivery Staff
+1. Log in to access the dedicated Delivery Dashboard.
+2. View actively assigned orders and update statuses as you pick up and hand over meals.
 
 ### For Admins
-1. Access Django admin panel at `/admin/`
-2. Manage users, menus, orders, and coupons
-3. Monitor platform activity and user roles
-
-## Admin Panel
-
-Access the Django admin interface at `http://127.0.0.1:8000/admin/` with superuser credentials to:
-- Manage users and assign roles
-- View and manage orders
-- Monitor menu items
-- Manage coupons and discounts
-
-## Security Considerations
-
-- Passwords are hashed before storage
-- CSRF protection is enabled
-- User sessions are managed securely
-- Admin registration is restricted and cannot be done through normal registration
-
-## Future Enhancements
-
-- Email notifications for order updates
-- SMS alerts for delivery
-- Rating and review system
-- Advanced analytics dashboard
-- Payment gateway integration (Stripe, PayPal)
-- Mobile application
-- Real-time order tracking with GPS
-- Chef ratings and filtering
-
-## Contributing
-
-Contributions are welcome! Please ensure:
-- Code follows Django best practices
-- All features are tested
-- Database migrations are included
-- Documentation is updated
+1. Log in with an Admin account.
+2. Use the Profile dashboard to view system-wide stats, manage all Home Cooks, and control platform coupons.
 
 ## License
 
-[Add your license information here]
-
-## Support
-
-For issues or questions, please contact the development team or file an issue in the project repository.
-
-## Deployment Notes
-
-Before deploying to production:
-- Set `DEBUG = False` in settings.py
-- Configure allowed hosts properly
-- Use a production-grade database (PostgreSQL, MySQL)
-- Set up environment variables for sensitive data
-- Use HTTPS
-- Configure proper logging
-- Run security checks: `python manage.py check --deploy`
+This project is open-source. Please refer to the LICENSE file for details.
