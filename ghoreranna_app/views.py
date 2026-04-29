@@ -6,7 +6,7 @@ from django.db.models import Sum
 from django.utils import timezone
 from decimal import Decimal, ROUND_HALF_UP
 import uuid
-from .models import User, Menu, Order, OrderDetails, Coupon, Payment, Delivery
+from .models import User, Menu, Order, OrderDetails, Coupon, Payment, Delivery, Notification
 from .forms import RegistrationForm, LoginForm, MenuForm, ProfileUpdateForm, CookManagementForm, CheckoutForm, CouponForm
 
 def register_view(request):
@@ -512,6 +512,21 @@ def checkout_view(request):
                 delivery_status='Pending',
             )
 
+            # ── Notifications ──
+            Notification.objects.create(
+                user=user,
+                message=f"Your order #{order.order_id} has been placed successfully.",
+                link=reverse('profile') + '?tab=tracking'
+            )
+            # Notify cooks
+            cooks = set([item['menu'].homecook for item in cart_items])
+            for cook in cooks:
+                Notification.objects.create(
+                    user=cook,
+                    message=f"You have received a new order (#{order.order_id}).",
+                    link=reverse('profile') + '?tab=incoming-orders'
+                )
+
             # ── Clear Cart ──
             request.session['cart'] = {}
             request.session.modified = True
@@ -605,6 +620,21 @@ def update_order_status(request, pk):
             except User.DoesNotExist:
                 pass
                 
+        # ── Notifications ──
+        if new_status:
+            buyer_link = reverse('profile') + '?tab=history' if new_status in ['Delivered', 'Cancelled'] else reverse('profile') + '?tab=tracking'
+            Notification.objects.create(
+                user=order.user,
+                message=f"Your order #{order.order_id} status updated to: {new_status}.",
+                link=buyer_link
+            )
+        if delivery_staff_id and 'staff' in locals():
+            Notification.objects.create(
+                user=staff,
+                message=f"You have been assigned to delivery for Order #{order.order_id}.",
+                link=reverse('delivery_dashboard')
+            )
+
         messages.success(request, f"Order #{order.order_id} updated successfully.")
         
         # Determine which tab to return to
@@ -633,6 +663,22 @@ def mark_order_delivered(request, pk):
                 order.delivery.delivery_date = timezone.now()
                 order.delivery.save()
                 
+                if order.delivery.delivery_staff:
+                    Notification.objects.create(
+                        user=order.delivery.delivery_staff,
+                        message=f"Order #{order.order_id} has been confirmed as Delivered by the customer.",
+                        link=reverse('delivery_dashboard') + '?tab=history'
+                    )
+            
+            # Notify cooks
+            cooks = set([detail.menu.homecook for detail in order.order_details.all()])
+            for cook in cooks:
+                Notification.objects.create(
+                    user=cook,
+                    message=f"Order #{order.order_id} has been confirmed as Delivered by the customer.",
+                    link=reverse('profile') + '?tab=cook-history'
+                )
+
             messages.success(request, f"Order #{order.order_id} marked as delivered. Enjoy your food!")
         else:
             messages.error(request, "Order cannot be marked as delivered yet.")
@@ -652,6 +698,15 @@ def cancel_order(request, pk):
         if order.order_status in ['Pending', 'Accepted']:
             order.order_status = 'Cancelled'
             order.save()
+            
+            # Notify cooks
+            cooks = set([detail.menu.homecook for detail in order.order_details.all()])
+            for cook in cooks:
+                Notification.objects.create(
+                    user=cook,
+                    message=f"Order #{order.order_id} was cancelled by the customer.",
+                    link=reverse('profile') + '?tab=cook-history'
+                )
             
             messages.success(request, f"Order #{order.order_id} has been cancelled.")
         else:
@@ -828,6 +883,34 @@ def delivery_update_status(request, pk):
         delivery.order.save()
 
     delivery.save()
+    
+    Notification.objects.create(
+        user=delivery.order.user,
+        message=f"Your order #{delivery.order.order_id} delivery status updated to: {new_status}.",
+        link=reverse('profile') + '?tab=tracking'
+    )
+
     messages.success(request, f"Order #{delivery.order.order_id} marked as '{new_status}'.")
     return redirect('delivery_dashboard')
-    return render(request, 'delivery_staff_profile.html', context)
+
+
+def notifications_view(request):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        messages.error(request, "Please log in.")
+        return redirect('login')
+        
+    notifications = Notification.objects.filter(user_id=user_id).order_by('-created_at')
+    
+    # Mark as read when viewing the page
+    notifications.filter(is_read=False).update(is_read=True)
+    
+    return render(request, 'notifications.html', {'notifications': notifications})
+
+
+def mark_notifications_read(request):
+    user_id = request.session.get('user_id')
+    if user_id:
+        Notification.objects.filter(user_id=user_id, is_read=False).update(is_read=True)
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=403)

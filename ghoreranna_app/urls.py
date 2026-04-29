@@ -36,4 +36,7 @@ urlpatterns = [
     path('manage-coupons/add/', views.coupon_add, name='coupon_add'),
     path('manage-coupons/<int:pk>/edit/', views.coupon_edit, name='coupon_edit'),
     path('manage-coupons/<int:pk>/delete/', views.coupon_delete, name='coupon_delete'),
+    # Notifications
+    path('notifications/', views.notifications_view, name='notifications'),
+    path('notifications/mark-read/', views.mark_notifications_read, name='mark_notifications_read'),
 ]

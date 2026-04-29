@@ -74,6 +74,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'ghoreranna_app.context_processors.cart_count',
+                'ghoreranna_app.context_processors.notifications',
             ],
         },
     },

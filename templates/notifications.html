@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Notifications - Ghoreranna{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto py-8">
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="px-6 py-5 border-b border-slate-200 bg-slate-50/50 flex justify-between items-center">
+            <h1 class="text-xl font-bold text-slate-800">Your Notifications</h1>
+            {% if notifications %}
+            <span class="bg-primary/10 text-primary text-xs font-semibold px-2.5 py-1 rounded-full">{{ notifications|length }} Total</span>
+            {% endif %}
+        </div>
+        
+        <div class="divide-y divide-slate-100">
+            {% for notification in notifications %}
+            {% if notification.link %}
+            <a href="{{ notification.link }}" class="block p-6 hover:bg-slate-50/80 transition-colors {% if not notification.is_read %}bg-blue-50/30{% endif %}">
+            {% else %}
+            <div class="p-6 hover:bg-slate-50/80 transition-colors {% if not notification.is_read %}bg-blue-50/30{% endif %}">
+            {% endif %}
+                <div class="flex items-start gap-4">
+                    <div class="mt-1">
+                        {% if not notification.is_read %}
+                        <div class="h-2 w-2 rounded-full bg-primary ring-4 ring-primary/20"></div>
+                        {% else %}
+                        <div class="h-2 w-2 rounded-full bg-slate-300"></div>
+                        {% endif %}
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-slate-800 font-medium {% if not notification.is_read %}text-slate-900{% endif %}">
+                            {{ notification.message }}
+                        </p>
+                        <p class="text-sm text-slate-500 mt-1 flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {{ notification.created_at|date:"M d, Y - h:i A" }}
+                        </p>
+                    </div>
+                </div>
+            {% if notification.link %}
+            </a>
+            {% else %}
+            </div>
+            {% endif %}
+            {% empty %}
+            <div class="p-12 text-center">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 text-slate-400 mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                </div>
+                <h3 class="text-lg font-semibold text-slate-800">No Notifications</h3>
+                <p class="text-slate-500 mt-1">You're all caught up! When you have new activity, it will show up here.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // As soon as page loads, we already marked as read in backend. 
+    // Just visually ensure the unread badge on navbar is cleared if it exists.
+    document.addEventListener('DOMContentLoaded', () => {
+        const badge = document.getElementById('navbar-notification-badge');
+        if (badge) {
+            badge.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}
